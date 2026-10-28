@@ -59,3 +59,52 @@
 
 @media (max-width:480px){.su-row{grid-template-columns:1fr;gap:0}}
 @media (prefers-reduced-motion:reduce){.su-step.is-active{animation:none}.su-progress>i,.su-role,.su-chip{transition:none}}
+
+/* ===== Field polish (v2): consistent floating labels, autofill, hidden Back ===== */
+#signupForm [hidden]{display:none !important}
+#signupForm .su-dot em{font-style:normal}
+#signupForm .su-row{gap:0 12px}
+#signupForm .field{position:relative;margin:0 0 14px}
+#signupForm .field input,
+#signupForm .field select{
+  display:block;width:100%;box-sizing:border-box;height:60px;margin:0;
+  padding:26px 16px 8px;border:1.5px solid var(--su-line);border-radius:14px;
+  background-color:#fffafa;color:#1a1114;font:inherit;font-size:1rem;line-height:1.2;
+  outline:0;box-shadow:none;-webkit-appearance:none;appearance:none;
+  transition:border-color .25s,box-shadow .25s,background-color .25s}
+#signupForm .field select{
+  padding-right:42px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%237a6a6e' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center}
+#signupForm .field:has(.pw-toggle) input{padding-right:70px}
+#signupForm .field label{
+  position:absolute;left:17px;top:20px;margin:0;font-size:1rem;line-height:1;
+  font-style:normal;font-weight:400;color:#7a6a6e;pointer-events:none;
+  transform:none;transition:top .2s,font-size .2s,color .2s}
+#signupForm .field input:focus + label,
+#signupForm .field input:not(:placeholder-shown) + label,
+#signupForm .field select:focus + label,
+#signupForm .field select:valid + label{top:10px;font-size:.74rem;font-weight:500}
+#signupForm .field input:focus + label,
+#signupForm .field select:focus + label{color:var(--su-accent)}
+#signupForm .field input:focus,
+#signupForm .field select:focus{
+  border-color:var(--su-accent);background-color:#fff;
+  box-shadow:0 0 0 4px rgba(224,36,58,.12)}
+#signupForm .field.is-invalid input,
+#signupForm .field.is-invalid select{border-color:var(--su-accent)}
+#signupForm .field input[readonly]{opacity:.75}
+/* iOS / Chrome autofill: remove the yellow fill */
+#signupForm .field input:-webkit-autofill,
+#signupForm .field input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#1a1114;
+  -webkit-box-shadow:0 0 0 1000px #fffafa inset;
+  caret-color:#1a1114;transition:background-color 9999s}
+#signupForm .field .pw-toggle{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  padding:8px;border:0;background:none;color:var(--su-accent);
+  font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
+#signupForm .field .error{margin:6px 0 0 4px}
+#signupForm .su-meter{margin:-6px 0 8px}
+#signupForm .su-hint{margin-bottom:16px}
+#signupForm .su-actions .btn{display:inline-flex;align-items:center;justify-content:center;text-align:center}
