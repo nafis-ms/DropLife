@@ -1500,15 +1500,15 @@ footer a:hover {
 .mmenu-nav a {
   position: relative;
   display: grid;
-  grid-template-columns: 34px 1fr auto;
-  align-items: baseline;
+  grid-template-columns: 1fr auto;
+  align-items: center;
   gap: 8px;
-  padding: clamp(10px, 2.2vh, 18px) 4px;
+  padding: clamp(12px, 2.2vh, 18px) 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-family: "Playfair Display", serif;
   font-weight: 700;
-  font-size: clamp(2rem, 9vw, 2.9rem);
-  line-height: 1.05;
+  font-size: clamp(1.35rem, 5.6vw, 1.7rem);
+  line-height: 1.1;
   letter-spacing: -0.01em;
   color: rgba(255, 255, 255, 0.92);
   -webkit-tap-highlight-color: transparent;
@@ -1527,13 +1527,6 @@ footer a:hover {
     opacity 0.8s ease calc(0.35s + var(--i) * 0.07s),
     transform 1s var(--ease) calc(0.35s + var(--i) * 0.07s),
     color 0.3s;
-}
-.mmenu-nav a small {
-  font-family: "Inter", sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  color: var(--red-light);
 }
 .mmenu-nav a b {
   font-family: "Inter", sans-serif;
@@ -1636,7 +1629,7 @@ footer a:hover {
 }
 @media (max-height: 560px) {
   .mmenu-nav a {
-    font-size: 1.6rem;
+    font-size: 1.25rem;
     padding: 8px 4px;
   }
   .mm-drop {
