@@ -50,11 +50,58 @@
                     <span class="pulse-dot"></span> Emergency
                 </button>
                 <button class="burger" id="burger" type="button"
-                    aria-label="Toggle menu" aria-expanded="false">
+                    aria-label="Open menu" aria-expanded="false"
+                    aria-controls="mobileMenu">
                     <span></span><span></span><span></span>
                 </button>
             </div>
         </header>
+
+
+        <!-- Mobile menu (lives outside <header> so backdrop-filter can't clip it) -->
+        <div class="mmenu" id="mobileMenu" aria-hidden="true" role="dialog"
+            aria-modal="true" aria-label="Site menu">
+            <div class="mmenu-scrim" data-mclose></div>
+            <div class="mmenu-panel" id="mmenuPanel">
+                <div class="mmenu-fx" aria-hidden="true">
+                    <i class="mm-glow mm-glow-a"></i>
+                    <i class="mm-glow mm-glow-b"></i>
+                    <i class="mm-ring"></i><i class="mm-ring r2"></i>
+                    <svg class="mm-drop" viewBox="0 0 100 130"><path
+                            d="M50 4 C50 4 8 56 8 84 a42 42 0 0 0 84 0 C92 56 50 4 50 4Z" /></svg>
+                    <i class="mm-grain"></i>
+                </div>
+
+                <div class="mmenu-top">
+                    <a href="#Home" class="mm-brand" data-mlink>
+                        <img src="Image/logo.png" alt>
+                        <span>Life<em>Drop</em></span>
+                    </a>
+                    <button class="mm-close" type="button" data-mclose
+                        aria-label="Close menu"><span></span><span></span></button>
+                </div>
+
+                <nav class="mmenu-nav" aria-label="Mobile navigation">
+                    <a href="#Home" data-mlink style="--i:0"><small>01</small><span>Home</span><b>&rarr;</b></a>
+                    <a href="#About" data-mlink style="--i:1"><small>02</small><span>About</span><b>&rarr;</b></a>
+                    <a href="#Donors" data-mlink style="--i:2"><small>03</small><span>Donors</span><b>&rarr;</b></a>
+                    <a href="#Hospitals" data-mlink style="--i:3"><small>04</small><span>Hospitals</span><b>&rarr;</b></a>
+                    <a href="#Contact" data-mlink style="--i:4"><small>05</small><span>Contact</span><b>&rarr;</b></a>
+                </nav>
+
+                <div class="mmenu-foot">
+                    <div class="mm-actions" style="--i:5">
+                        <button class="btn btn-ghost-light" type="button">Account</button>
+                        <button class="btn btn-primary" type="button"
+                            id="mmEmergency"><span class="pulse-dot"></span> Emergency</button>
+                    </div>
+                    <p class="mm-contact" style="--i:6">
+                        <span>+880 194 961 1414</span>
+                        <span>musbitul.haque.nafis@gmail.com</span>
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <main>
             <!-- HOME -->
