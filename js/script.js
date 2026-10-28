@@ -392,6 +392,8 @@
       if (!v) msg = "This field is required";
       else if (input.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
         msg = "Enter a valid email";
+      else if (input.dataset.min && v.length < +input.dataset.min)
+        msg = `Use at least ${input.dataset.min} characters`;
       else if (input.type === "tel" && !/^[+\d][\d\s-]{6,}$/.test(v))
         msg = "Enter a valid phone number";
       f.classList.toggle("invalid", !!msg);
@@ -430,6 +432,207 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
   }
+
+
+  /*  Auth: email + password, or Google  */
+  // 1) Create an OAuth "Web application" client at
+  //    https://console.cloud.google.com/apis/credentials
+  // 2) Add your site's origin under "Authorized JavaScript origins"
+  // 3) Paste the client ID below.
+  const GOOGLE_CLIENT_ID = "";
+
+  // Replace these two functions with real calls to your backend.
+  // They must resolve to { name, email, picture? } or throw an Error.
+  const authApi = {
+    async login({ email }) {
+      await new Promise((r) => setTimeout(r, 700));
+      return { name: email.split("@")[0], email };
+    },
+    async signup({ name, email }) {
+      await new Promise((r) => setTimeout(r, 800));
+      return { name, email };
+    },
+  };
+
+  const authModal = $("#authModal");
+  const guestView = $("#authGuest");
+  const userView = $("#authUser");
+  const tabsEl = $(".auth-tabs", authModal);
+  const loginForm = $("#loginForm");
+  const signupForm = $("#signupForm");
+  const googleBtn = $("#googleBtn");
+  const accountBtns = [$("#accountBtn"), $("#mmAccount")].filter(Boolean);
+  let session = null;
+  try {
+    session = JSON.parse(localStorage.getItem("lifedrop-user") || "null");
+  } catch (_) {}
+
+  const setAuthModal = (open) => {
+    authModal.classList.toggle("open", open);
+    authModal.setAttribute("aria-hidden", !open);
+    document.body.classList.toggle("locked", open);
+    if (open) setTimeout(() => $("input:not([hidden])", authModal)?.focus({ preventScroll: true }), 450);
+  };
+  const setTab = (tab) => {
+    tabsEl.dataset.active = tab;
+    $$("button[data-tab]", tabsEl).forEach((b) => {
+      const on = b.dataset.tab === tab;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", on);
+    });
+    loginForm.hidden = tab !== "login";
+    signupForm.hidden = tab !== "signup";
+    $("#authTitle").textContent = tab === "login" ? "Welcome back" : "Join LifeDrop";
+    $("#authSub").textContent =
+      tab === "login" ? "Log in to manage your donor profile and requests."
+      : "Create an account to become a donor or request blood.";
+  };
+  const paint = () => {
+    const user = session;
+    guestView.hidden = !!user;
+    userView.hidden = !user;
+    accountBtns.forEach((b) => (b.textContent = user ? user.name.split(" ")[0] : "Account"));
+    if (user) {
+      const av = $("#authAvatar");
+      av.textContent = user.picture ? "" : user.name[0].toUpperCase();
+      av.style.backgroundImage = user.picture ? `url("${user.picture}")` : "";
+      $("#authName").textContent = user.name;
+      $("#authEmail").textContent = user.email;
+    }
+  };
+  const signIn = (user, msg) => {
+    session = user;
+    try {
+      localStorage.setItem("lifedrop-user", JSON.stringify(user));
+    } catch (_) {}
+    paint();
+    loginForm.reset();
+    signupForm.reset();
+    $$(".field", authModal).forEach((f) => f.classList.remove("invalid"));
+    toast(msg || `Signed in as ${user.name}`);
+  };
+
+  accountBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.id === "mmAccount") {
+        toggleMenu(false);
+        setTimeout(() => setAuthModal(true), reduceMotion ? 0 : 450);
+      } else setAuthModal(true);
+    }),
+  );
+  $$("[data-aclose]", authModal).forEach((el) =>
+    el.addEventListener("click", () => setAuthModal(false)),
+  );
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && authModal.classList.contains("open")) setAuthModal(false);
+  });
+  $$("button[data-tab]", tabsEl).forEach((b) =>
+    b.addEventListener("click", () => setTab(b.dataset.tab)),
+  );
+  $$(".pw-toggle", authModal).forEach((t) =>
+    t.addEventListener("click", () => {
+      const inp = $("input", t.parentElement);
+      const show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      inp.dataset.pw = "1";
+      t.textContent = show ? "Hide" : "Show";
+      t.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    }),
+  );
+
+  const submitAuth = async (form, fn) => {
+    if (!validate(form)) return;
+    const btn = $("button[type=submit]", form);
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Please wait…";
+    try {
+      const user = await fn();
+      signIn(user);
+      setAuthModal(false);
+    } catch (err) {
+      toast(err.message || "Something went wrong. Try again.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+  };
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submitAuth(loginForm, () =>
+      authApi.login({ email: $("#lEmail").value.trim(), password: $("#lPass").value }),
+    );
+  });
+  signupForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submitAuth(signupForm, () =>
+      authApi.signup({
+        name: $("#sName").value.trim(),
+        email: $("#sEmail").value.trim(),
+        password: $("#sPass").value,
+      }),
+    );
+  });
+
+  // Google sign-in (Google Identity Services, loaded on first click)
+  let gisPromise;
+  const loadGis = () =>
+    (gisPromise ||= new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://accounts.google.com/gsi/client";
+      s.async = true;
+      s.onload = res;
+      s.onerror = () => rej(new Error("Could not reach Google. Check your connection."));
+      document.head.appendChild(s);
+    }));
+  googleBtn.addEventListener("click", async () => {
+    if (!GOOGLE_CLIENT_ID) {
+      toast("Google sign-in needs a client ID. See GOOGLE_CLIENT_ID in script.js.");
+      return;
+    }
+    googleBtn.disabled = true;
+    try {
+      await loadGis();
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: "openid email profile",
+        callback: async (resp) => {
+          try {
+            if (resp.error) throw new Error("Google sign-in was cancelled.");
+            const r = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+              headers: { Authorization: `Bearer ${resp.access_token}` },
+            });
+            const u = await r.json();
+            signIn({ name: u.name || u.email, email: u.email, picture: u.picture });
+            setAuthModal(false);
+          } catch (err) {
+            toast(err.message);
+          } finally {
+            googleBtn.disabled = false;
+          }
+        },
+        error_callback: () => {
+          googleBtn.disabled = false;
+          toast("Google sign-in was cancelled.");
+        },
+      });
+      client.requestAccessToken();
+    } catch (err) {
+      googleBtn.disabled = false;
+      toast(err.message);
+    }
+  });
+
+  $("#logoutBtn").addEventListener("click", () => {
+    session = null;
+    try {
+      localStorage.removeItem("lifedrop-user");
+    } catch (_) {}
+    paint();
+    setAuthModal(false);
+    toast("Signed out.");
+  });
+  paint();
 
   /*  Particles: floating blood cells  */
   const canvas = $("#particles");
