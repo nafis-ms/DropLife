@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+            content="LifeDrop connects blood donors with hospitals and patients in need. Every drop can save a life.">
+        <title>LifeDrop - Every Drop Can Save A Life</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700;800&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+
+        <!-- Preloader -->
+        <div class="preloader" id="preloader" aria-hidden="true">
+            <svg class="preloader-drop" viewBox="0 0 100 130">
+                <path
+                    d="M50 4 C50 4 8 56 8 84 a42 42 0 0 0 84 0 C92 56 50 4 50 4Z" />
+            </svg>
+            <p class="preloader-text">LifeDrop</p>
+        </div>
+
+        <div class="scroll-progress" id="scrollProgress"></div>
+        <canvas id="particles" aria-hidden="true"></canvas>
+
+        <header id="siteHeader">
+            <div class="logo">
+                <a href="#Home" class="brand" aria-label="LifeDrop home">
+                    <img src="Image/logo.png" alt>
+                    <span class="brand-name">Life<em>Drop</em></span>
+                </a>
+            </div>
+
+            <nav class="nav-links" id="navLinks" aria-label="Main navigation">
+                <a href="#Home" class="active">Home</a>
+                <a href="#About">About</a>
+                <a href="#Donors">Donors</a>
+                <a href="#Hospitals">Hospitals</a>
+                <a href="#Contact">Contact</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="btn btn-ghost" type="button">Account</button>
+                <button class="btn btn-emergency" type="button"
+                    id="emergencyBtn">
+                    <span class="pulse-dot"></span> Emergency
+                </button>
+                <button class="burger" id="burger" type="button"
+                    aria-label="Toggle menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- HOME -->
+            <section id="Home" class="hero">
+                <div class="hero-glow"></div>
+                <div class="hero-content">
+                    <span class="eyebrow reveal">Donate blood. Give hope.</span>
+                    <h1 class="hero-title">
+                        <span class="line"><span>Every Drop Can</span></span>
+                        <span class="line"><span>Save <em>A
+                                    Life</em></span></span>
+                    </h1>
+                    <p class="hero-sub reveal" style="--d:.9s">
+                        LifeDrop connects willing donors with hospitals and
+                        patients in urgent need,
+                        quickly, safely and for free. One donation can save up
+                        to three lives.
+                    </p>
+                    <div class="hero-cta reveal" style="--d:1.1s">
+                        <a href="#Donors" class="btn btn-primary">Become a
+                            Donor</a>
+                        <a href="#About" class="btn btn-outline">How it
+                            works</a>
+                    </div>
+                </div>
+
+                <div class="hero-visual" id="heroVisual">
+                    <div class="ring ring-1"></div>
+                    <div class="ring ring-2"></div>
+                    <div class="ring ring-3"></div>
+                    <svg class="big-drop" viewBox="0 0 200 260"
+                        aria-hidden="true">
+                        <defs>
+                            <lineargradient id="dropGrad" x1="0" y1="0" x2="0"
+                                y2="1">
+                                <stop offset="0" stop-color="#ff4d5e" />
+                                <stop offset="1" stop-color="#a30015" />
+                            </lineargradient>
+                            <clippath id="dropClip">
+                                <path
+                                    d="M100 8 C100 8 16 112 16 168 a84 84 0 0 0 168 0 C184 112 100 8 100 8Z" />
+                            </clippath>
+                        </defs>
+                        <path
+                            d="M100 8 C100 8 16 112 16 168 a84 84 0 0 0 168 0 C184 112 100 8 100 8Z"
+                            fill="url(#dropGrad)" />
+                        <g clip-path="url(#dropClip)">
+                            <path class="wave wave-a"
+                                d="M-200 150 q50 -22 100 0 t100 0 t100 0 t100 0 t100 0 V300 H-200Z"
+                                fill="rgba(255,255,255,.16)" />
+                            <path class="wave wave-b"
+                                d="M-200 165 q50 -18 100 0 t100 0 t100 0 t100 0 t100 0 V300 H-200Z"
+                                fill="rgba(255,255,255,.10)" />
+                        </g>
+                        <ellipse cx="62" cy="130" rx="10" ry="26"
+                            fill="rgba(255,255,255,.35)"
+                            transform="rotate(18 62 130)" />
+                    </svg>
+                    <div
+                        class="float-card fc-1"><strong>O-</strong><span>Universal
+                            donor</span></div>
+                    <div class="float-card fc-2"><strong>3
+                            lives</strong><span>per donation</span></div>
+                </div>
+
+                <a href="#About" class="scroll-hint"
+                    aria-label="Scroll down"><span></span></a>
+            </section>
+
+            <!-- ABOUT -->
+            <section id="About" class="section">
+                <div class="section-head reveal">
+                    <span class="eyebrow">About LifeDrop</span>
+                    <h2>Simple. Fast. Life-saving.</h2>
+                    <p>We remove the delays between a patient in need and a
+                        donor ready to help.</p>
+                </div>
+
+                <div class="steps">
+                    <article class="step tilt reveal">
+                        <div class="step-num">01</div>
+                        <h3>Register</h3>
+                        <p>Create your donor profile with your blood group,
+                            location and availability in under two minutes.</p>
+                    </article>
+                    <article class="step tilt reveal" style="--d:.15s">
+                        <div class="step-num">02</div>
+                        <h3>Get Matched</h3>
+                        <p>When a hospital posts a request, we instantly alert
+                            compatible donors nearby.</p>
+                    </article>
+                    <article class="step tilt reveal" style="--d:.3s">
+                        <div class="step-num">03</div>
+                        <h3>Donate &amp; Save</h3>
+                        <p>Visit the hospital, donate safely and become
+                            someone's hero.</p>
+                    </article>
+                </div>
+
+                <div class="compat reveal">
+                    <h3>Know your blood group</h3>
+                    <div class="group-picker" id="groupPicker"
+                        role="tablist"></div>
+                    <p class="compat-result" id="compatResult">Select a blood
+                        group to see who you can donate to.</p>
+                </div>
+            </section>
+
+            <!-- DONORS -->
+            <section id="Donors" class="section section-alt">
+                <div class="section-head reveal">
+                    <span class="eyebrow">Our Donors</span>
+                    <h2>Find a donor near you</h2>
+                    <p>Filter by blood group and contact available heroes
+                        directly.</p>
+                </div>
+
+                <div class="filters reveal" id="donorFilters"></div>
+                <div class="donor-grid" id="donorGrid"></div>
+            </section>
+
+            <!-- HOSPITALS -->
+            <section id="Hospitals" class="section">
+                <div class="section-head reveal">
+                    <span class="eyebrow">Partner Hospitals</span>
+                    <h2>Trusted care partners</h2>
+                    <p>Live blood stock levels across our partner network.</p>
+                </div>
+                <div class="hospital-grid" id="hospitalGrid"></div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta">
+                <div class="cta-inner reveal">
+                    <h2>Someone is waiting for your drop.</h2>
+                    <p>It takes about an hour. It could give someone a
+                        lifetime.</p>
+                    <a href="#Contact" class="btn btn-light">Join LifeDrop
+                        today</a>
+                </div>
+            </section>
+
+            <!-- CONTACT -->
+            <section id="Contact" class="section">
+                <div class="section-head reveal">
+                    <span class="eyebrow">Contact</span>
+                    <h2>Get in touch</h2>
+                    <p>Questions, partnerships or want to organise a blood
+                        drive? Write to us.</p>
+                </div>
+
+                <div class="contact-wrap">
+                    <div class="contact-info reveal">
+                        <div><h4>Contact</h4><p>+880 194 961 1414</p></div>
+                        <div><h4>Email</h4><p>musbitul.haque.nafis@gmail.com</p></div>
+                    </div>
+
+                    <form class="contact-form reveal" id="contactForm"
+                        novalidate style="--d:.15s">
+                        <div class="field">
+                            <input type="text" id="cName" name="name"
+                                placeholder=" " required>
+                            <label for="cName">Full name</label>
+                            <small class="error"></small>
+                        </div>
+                        <div class="field">
+                            <input type="email" id="cEmail" name="email"
+                                placeholder=" " required>
+                            <label for="cEmail">Email address</label>
+                            <small class="error"></small>
+                        </div>
+                        <div class="field">
+                            <textarea id="cMsg" name="message" rows="4"
+                                placeholder=" " required></textarea>
+                            <label for="cMsg">Your message</label>
+                            <small class="error"></small>
+                        </div>
+                        <button type="submit"
+                            class="btn btn-primary btn-block">Send
+                            Message</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; <span id="year">2026</span> - Musbitul Haque</p>
+            <nav>
+                <a href="#Home">Home</a><a href="#About">About</a><a
+                    href="#Donors">Donors</a>
+                <a href="#Hospitals">Hospitals</a><a href="#Contact">Contact</a>
+            </nav>
+        </footer>
+
+        <!-- Emergency modal -->
+        <div class="modal" id="emergencyModal" aria-hidden="true">
+            <div class="modal-backdrop" data-close></div>
+            <div class="modal-box" role="dialog" aria-modal="true"
+                aria-labelledby="emTitle">
+                <button class="modal-close" data-close
+                    aria-label="Close">&times;</button>
+                <h3 id="emTitle">Emergency Blood Request</h3>
+                <p>Tell us what is needed. We will alert matching donors
+                    immediately.</p>
+                <form id="emergencyForm" novalidate>
+                    <div class="field">
+                        <select id="emGroup" required>
+                            <option value disabled selected></option>
+                            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                        </select>
+                        <label for="emGroup">Blood group needed</label>
+                        <small class="error"></small>
+                    </div>
+                    <div class="field">
+                        <input type="text" id="emHospital" placeholder=" "
+                            required>
+                        <label for="emHospital">Hospital / location</label>
+                        <small class="error"></small>
+                    </div>
+                    <div class="field">
+                        <input type="tel" id="emPhone" placeholder=" " required>
+                        <label for="emPhone">Contact number</label>
+                        <small class="error"></small>
+                    </div>
+                    <button type="submit"
+                        class="btn btn-emergency btn-block">Send Alert</button>
+                </form>
+            </div>
+        </div>
+
+        <button class="to-top" id="toTop"
+            aria-label="Back to top">&uarr;</button>
+        <div class="toast" id="toast" role="status"></div>
+
+        <script src="js/script.js"></script>
+    </body>
+</html>
