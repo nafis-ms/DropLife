@@ -44,7 +44,8 @@
             </nav>
 
             <div class="header-actions">
-                <button class="btn btn-ghost" type="button">Account</button>
+                <button class="btn btn-ghost" type="button"
+                    id="accountBtn">Account</button>
                 <button class="btn btn-emergency" type="button"
                     id="emergencyBtn">
                     <span class="pulse-dot"></span> Emergency
@@ -91,7 +92,8 @@
 
                 <div class="mmenu-foot">
                     <div class="mm-actions" style="--i:5">
-                        <button class="btn btn-ghost-light" type="button">Account</button>
+                        <button class="btn btn-ghost-light" type="button"
+                            id="mmAccount">Account</button>
                         <button class="btn btn-primary" type="button"
                             id="mmEmergency"><span class="pulse-dot"></span> Emergency</button>
                     </div>
@@ -327,6 +329,78 @@
                     <button type="submit"
                         class="btn btn-emergency btn-block">Send Alert</button>
                 </form>
+            </div>
+        </div>
+
+
+        <!-- Auth modal -->
+        <div class="modal" id="authModal" aria-hidden="true">
+            <div class="modal-backdrop" data-aclose></div>
+            <div class="modal-box auth-box" role="dialog" aria-modal="true"
+                aria-labelledby="authTitle">
+                <button class="modal-close" data-aclose
+                    aria-label="Close">&times;</button>
+
+                <!-- signed out -->
+                <div id="authGuest">
+                    <h3 id="authTitle">Welcome back</h3>
+                    <p id="authSub">Log in to manage your donor profile and requests.</p>
+
+                    <div class="auth-tabs" role="tablist">
+                        <button type="button" role="tab" class="active" data-tab="login" aria-selected="true">Log in</button>
+                        <button type="button" role="tab" data-tab="signup" aria-selected="false">Sign up</button>
+                        <i class="auth-tab-ink"></i>
+                    </div>
+
+                    <button type="button" class="btn-google" id="googleBtn">
+                        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+                        Continue with Google
+                    </button>
+                    <div class="auth-or"><span>or use email</span></div>
+
+                    <form id="loginForm" class="auth-form" novalidate>
+                        <div class="field">
+                            <input type="email" id="lEmail" placeholder=" " autocomplete="email" required>
+                            <label for="lEmail">Email address</label>
+                            <small class="error"></small>
+                        </div>
+                        <div class="field">
+                            <input type="password" id="lPass" placeholder=" " autocomplete="current-password" required>
+                            <label for="lPass">Password</label>
+                            <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
+                            <small class="error"></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+                    </form>
+
+                    <form id="signupForm" class="auth-form" novalidate hidden>
+                        <div class="field">
+                            <input type="text" id="sName" placeholder=" " autocomplete="name" required>
+                            <label for="sName">Full name</label>
+                            <small class="error"></small>
+                        </div>
+                        <div class="field">
+                            <input type="email" id="sEmail" placeholder=" " autocomplete="email" required>
+                            <label for="sEmail">Email address</label>
+                            <small class="error"></small>
+                        </div>
+                        <div class="field">
+                            <input type="password" id="sPass" placeholder=" " autocomplete="new-password" data-min="8" required>
+                            <label for="sPass">Password (min 8 characters)</label>
+                            <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
+                            <small class="error"></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Create account</button>
+                    </form>
+                </div>
+
+                <!-- signed in -->
+                <div id="authUser" hidden>
+                    <div class="auth-avatar" id="authAvatar"></div>
+                    <h3 id="authName">Hello</h3>
+                    <p id="authEmail"></p>
+                    <button type="button" class="btn btn-emergency btn-block" id="logoutBtn">Sign out</button>
+                </div>
             </div>
         </div>
 
