@@ -64,23 +64,107 @@
     window.scrollTo({ top: 0, behavior: "smooth" }),
   );
 
-  /*  Mobile menu  */
+  /*  Mobile menu (cinematic drawer)  */
   const burger = $("#burger");
   const navLinks = $("#navLinks");
+  const mmenu = $("#mobileMenu");
+  const mmPanel = $("#mmenuPanel");
+  const mqMobile = matchMedia("(max-width: 820px)");
+  let menuOpen = false;
+  let lastFocus = null;
+
   const toggleMenu = (force) => {
-    const open = force ?? !navLinks.classList.contains("open");
-    navLinks.classList.toggle("open", open);
+    const open = force ?? !menuOpen;
+    if (open === menuOpen) return;
+    if (open && !mqMobile.matches) return;
+    menuOpen = open;
+
+    if (open) {
+      // iris reveal originates from the burger button
+      const r = burger.getBoundingClientRect();
+      mmenu.style.setProperty("--mx", r.left + r.width / 2 + "px");
+      mmenu.style.setProperty("--my", r.top + r.height / 2 + "px");
+      lastFocus = document.activeElement;
+      mmenu.scrollTop = mmPanel.scrollTop = 0;
+    }
+
+    mmenu.classList.toggle("open", open);
+    mmenu.setAttribute("aria-hidden", !open);
     burger.classList.toggle("open", open);
     burger.setAttribute("aria-expanded", open);
+    burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    document.body.classList.toggle("menu-open", open);
+    if ("inert" in mmenu) mmenu.inert = !open;
+
+    if (open) {
+      setTimeout(() => $(".mm-close", mmenu).focus({ preventScroll: true }), 450);
+    } else if (lastFocus) {
+      lastFocus.focus?.({ preventScroll: true });
+    }
   };
+  if ("inert" in mmenu) mmenu.inert = true;
+
   burger.addEventListener("click", () => toggleMenu());
-  $$("a", navLinks).forEach((a) =>
-    a.addEventListener("click", () => toggleMenu(false)),
+  $$("[data-mclose]", mmenu).forEach((el) =>
+    el.addEventListener("click", () => toggleMenu(false)),
   );
+  // navigate: close first, then scroll once the iris has started closing
+  $$("[data-mlink]", mmenu).forEach((a) =>
+    a.addEventListener("click", (e) => {
+      const id = a.getAttribute("href");
+      const target = id && id.length > 1 ? $(id) : null;
+      toggleMenu(false);
+      if (target) {
+        e.preventDefault();
+        setTimeout(
+          () => target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }),
+          reduceMotion ? 0 : 350,
+        );
+        history.replaceState(null, "", id);
+      }
+    }),
+  );
+  const mmEm = $("#mmEmergency");
+  if (mmEm)
+    mmEm.addEventListener("click", () => {
+      toggleMenu(false);
+      setTimeout(() => $("#emergencyBtn").click(), reduceMotion ? 0 : 450);
+    });
+  // keyboard: Esc closes, Tab stays inside the drawer
+  document.addEventListener("keydown", (e) => {
+    if (!menuOpen) return;
+    if (e.key === "Escape") return toggleMenu(false);
+    if (e.key !== "Tab") return;
+    const f = $$("a[href], button:not([disabled])", mmPanel);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+  // swipe right (or up) to dismiss
+  let tx = 0, ty = 0;
+  mmPanel.addEventListener("touchstart", (e) => {
+    tx = e.touches[0].clientX;
+    ty = e.touches[0].clientY;
+  }, { passive: true });
+  mmPanel.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    if ((dx > 90 && Math.abs(dy) < 60) || (dy < -120 && Math.abs(dx) < 60))
+      toggleMenu(false);
+  }, { passive: true });
+  // leaving mobile width closes it
+  const onMq = () => { if (!mqMobile.matches) toggleMenu(false); };
+  mqMobile.addEventListener?.("change", onMq);
 
   /*  Scroll spy  */
   const sections = $$("main section[id]");
-  const links = $$("a", navLinks);
+  const links = [...$$("a", navLinks), ...$$(".mmenu-nav a")];
   const spy = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
