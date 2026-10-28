@@ -1,0 +1,61 @@
+/* LifeDrop: multi-step signup. Load AFTER css/style.css */
+.auth-box{max-height:92vh;overflow-y:auto}
+.su-form{--su-accent:#e0243a;--su-line:rgba(128,128,128,.3);--su-soft:rgba(128,128,128,.08)}
+
+/* progress */
+.su-progress{position:relative;display:flex;justify-content:space-between;margin:6px 0 26px}
+.su-progress::before,.su-progress>i{content:"";position:absolute;top:11px;left:11px;right:11px;height:2px;background:var(--su-line)}
+.su-progress>i{right:auto;width:calc((100% - 22px) * var(--p,0));background:linear-gradient(90deg,#ff4d5e,#a30015);transition:width .8s cubic-bezier(.65,0,.2,1);z-index:1}
+.su-dot{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.74rem;opacity:.6;transition:opacity .4s}
+.su-dot b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:.75rem;font-weight:600;background:var(--su-soft);border:2px solid var(--su-line);backdrop-filter:blur(6px);transition:all .4s}
+.su-dot.is-now,.su-dot.is-done{opacity:1}
+.su-dot.is-now b{border-color:var(--su-accent);box-shadow:0 0 0 4px rgba(224,36,58,.18),0 0 18px rgba(224,36,58,.5)}
+.su-dot.is-done b{background:var(--su-accent);border-color:var(--su-accent);color:#fff}
+
+/* steps */
+.su-step{display:none}
+.su-step.is-active{display:block;animation:suIn .6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes suIn{from{opacity:0;transform:translateX(calc(var(--dir,1) * 32px));filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.su-title{font-family:'Playfair Display',serif;font-size:1.5rem;line-height:1.2;margin:0 0 6px}
+.su-sub{margin:0 0 18px;font-size:.92rem;opacity:.72}
+.su-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.su-form fieldset{border:0;margin:0 0 14px;padding:0;min-width:0}
+.su-form legend{padding:0;margin-bottom:8px;font-size:.85rem;opacity:.78}
+.su-note{margin:0 0 16px;padding:10px 12px;border-left:3px solid var(--su-accent);background:var(--su-soft);border-radius:8px;font-size:.88rem}
+
+/* errors */
+.su-form .error,.su-form .su-err{display:block;margin-top:4px;color:var(--su-accent);font-size:.78rem}
+.su-form .error:empty,.su-form .su-err:empty{display:none}
+.su-form .field.is-invalid input,.su-form .field.is-invalid select{border-color:var(--su-accent)}
+
+/* password meter */
+.su-meter{display:block;height:4px;margin:-4px 0 6px;border-radius:4px;background:var(--su-line);overflow:hidden}
+.su-meter i{display:block;height:100%;width:calc(var(--s,0) * 25%);background:#e0243a;transition:width .4s,background .4s}
+.su-meter[data-level="3"] i{background:#e59a12}
+.su-meter[data-level="4"] i{background:#1fa463}
+.su-hint{display:block;margin-bottom:14px;font-size:.76rem;opacity:.6}
+
+/* role cards */
+.su-roles{display:grid;gap:10px}
+.su-role{position:relative;display:block;padding:15px 18px;border:1px solid var(--su-line);border-radius:14px;background:var(--su-soft);cursor:pointer;transition:transform .3s,border-color .3s,box-shadow .3s,background .3s}
+.su-role input{position:absolute;opacity:0;pointer-events:none}
+.su-role strong{display:block;font-size:1.02rem}
+.su-role span{display:block;margin-top:2px;font-size:.86rem;opacity:.7}
+.su-role:hover{transform:translateY(-2px)}
+.su-role:has(input:checked){border-color:var(--su-accent);background:rgba(224,36,58,.1);box-shadow:0 0 0 3px rgba(224,36,58,.15),0 14px 32px -14px rgba(224,36,58,.6)}
+.su-role:has(input:focus-visible),.su-chip:has(input:focus-visible){outline:2px solid var(--su-accent);outline-offset:2px}
+
+/* blood group chips */
+.su-chip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.su-chip{position:relative;text-align:center;padding:10px 0;border:1px solid var(--su-line);border-radius:10px;font-weight:600;cursor:pointer;transition:all .25s}
+.su-chip input{position:absolute;opacity:0;pointer-events:none}
+.su-chip:has(input:checked){color:#fff;border-color:transparent;background:linear-gradient(160deg,#ff4d5e,#a30015);box-shadow:0 8px 20px -8px rgba(224,36,58,.8)}
+
+/* checkboxes + actions */
+.su-check{display:flex;gap:10px;align-items:flex-start;margin:4px 0 12px;font-size:.86rem;line-height:1.45;cursor:pointer}
+.su-check input{margin-top:3px;accent-color:#e0243a}
+.su-actions{display:flex;gap:10px;margin-top:20px}
+.su-actions .su-next{flex:1}
+
+@media (max-width:480px){.su-row{grid-template-columns:1fr;gap:0}}
+@media (prefers-reduced-motion:reduce){.su-step.is-active{animation:none}.su-progress>i,.su-role,.su-chip{transition:none}}
