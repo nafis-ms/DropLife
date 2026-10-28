@@ -343,8 +343,9 @@ header.scrolled {
 
 .burger {
   display: none;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+  -webkit-tap-highlight-color: transparent;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -1215,28 +1216,12 @@ footer a:hover {
   .burger {
     display: flex;
   }
-  .header-actions .btn-ghost {
+  .header-actions .btn-ghost,
+  .header-actions .btn-emergency {
     display: none;
   }
   .nav-links {
-    position: fixed;
-    inset: 0 0 0 auto;
-    width: min(300px, 80vw);
-    flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-    padding: 40px;
-    background: var(--bg);
-    box-shadow: -20px 0 50px -20px rgba(0, 0, 0, 0.3);
-    transform: translateX(100%);
-    transition: transform 0.6s var(--ease);
-    z-index: -1;
-  }
-  .nav-links.open {
-    transform: none;
-  }
-  .nav-links a {
-    font-size: 1.3rem;
+    display: none;
   }
 }
 @media (max-width: 520px) {
@@ -1254,6 +1239,416 @@ footer a:hover {
   }
 }
 
+
+/* ============================================================
+   Mobile menu — cinematic full-screen drawer
+   ============================================================ */
+.mmenu {
+  --mx: calc(100% - 40px);
+  --my: 38px;
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  visibility: hidden;
+  pointer-events: none;
+  display: none;
+  transition: visibility 0s linear 1s;
+}
+.mmenu.open {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+.mmenu-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 3, 5, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.mmenu.open .mmenu-scrim {
+  opacity: 1;
+}
+
+.mmenu-panel {
+  position: absolute;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: max(18px, env(safe-area-inset-top)) clamp(22px, 7vw, 40px)
+    max(24px, env(safe-area-inset-bottom));
+  color: #fff;
+  background:
+    radial-gradient(120% 70% at 100% 0%, #3a0510 0%, transparent 60%),
+    linear-gradient(170deg, #1d0a0f 0%, #0d0407 100%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* circular iris reveal from the burger position */
+  clip-path: circle(0px at var(--mx) var(--my));
+  -webkit-clip-path: circle(0px at var(--mx) var(--my));
+  transition:
+    clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.12s,
+    -webkit-clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.12s;
+}
+.mmenu.open .mmenu-panel {
+  clip-path: circle(150vmax at var(--mx) var(--my));
+  -webkit-clip-path: circle(150vmax at var(--mx) var(--my));
+  transition-delay: 0s;
+}
+
+/* cinematic letterbox sweep line */
+.mmenu-panel::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--red-light), transparent);
+  transform: translateX(-100%);
+  z-index: 3;
+}
+.mmenu.open .mmenu-panel::before {
+  animation: mmSweep 1.3s var(--ease) 0.25s both;
+}
+@keyframes mmSweep {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* atmosphere */
+.mmenu-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.mm-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0;
+  transition: opacity 1.2s ease 0.3s;
+}
+.mmenu.open .mm-glow {
+  opacity: 1;
+}
+.mm-glow-a {
+  width: 340px;
+  height: 340px;
+  right: -140px;
+  top: -80px;
+  background: radial-gradient(circle, rgba(255, 77, 94, 0.5), transparent 65%);
+  animation: glowDrift 9s ease-in-out infinite alternate;
+}
+.mm-glow-b {
+  width: 300px;
+  height: 300px;
+  left: -140px;
+  bottom: -100px;
+  background: radial-gradient(circle, rgba(163, 0, 21, 0.55), transparent 65%);
+  animation: glowDrift 11s ease-in-out infinite alternate-reverse;
+}
+.mm-drop {
+  position: absolute;
+  width: 280px;
+  right: -70px;
+  bottom: 14%;
+  fill: rgba(225, 29, 52, 0.09);
+  transform: translateY(60px) rotate(8deg) scale(0.9);
+  opacity: 0;
+  transition:
+    transform 1.4s var(--ease) 0.35s,
+    opacity 1.2s ease 0.35s;
+}
+.mmenu.open .mm-drop {
+  opacity: 1;
+  transform: rotate(8deg);
+  animation: mmFloat 7s ease-in-out 1.7s infinite;
+}
+@keyframes mmFloat {
+  50% {
+    transform: translateY(-18px) rotate(5deg);
+  }
+}
+.mm-ring {
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 140px;
+  height: 140px;
+  margin: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 77, 94, 0.4);
+  opacity: 0;
+}
+.mmenu.open .mm-ring {
+  animation: ringOut 3.6s linear 0.5s infinite;
+}
+.mm-ring.r2 {
+  animation-delay: 1.7s !important;
+}
+.mm-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+
+/* top bar */
+.mmenu-top,
+.mmenu-nav,
+.mmenu-foot {
+  position: relative;
+  z-index: 2;
+}
+.mmenu-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  margin-bottom: clamp(18px, 5vh, 44px);
+  opacity: 0;
+  transform: translateY(-14px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s var(--ease);
+}
+.mmenu.open .mmenu-top {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.35s;
+}
+.mm-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Playfair Display", serif;
+  font-weight: 800;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+.mm-brand img {
+  height: 40px;
+  width: auto;
+}
+.mm-brand em {
+  font-style: normal;
+  color: var(--red-light);
+}
+.mm-close {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.6s var(--ease),
+    background 0.3s,
+    border-color 0.3s;
+}
+.mm-close span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 2px;
+  margin: -1px 0 0 -9px;
+  border-radius: 2px;
+  background: #fff;
+}
+.mm-close span:nth-child(1) {
+  transform: rotate(45deg);
+}
+.mm-close span:nth-child(2) {
+  transform: rotate(-45deg);
+}
+.mm-close:active {
+  transform: rotate(90deg) scale(0.92);
+  background: var(--red);
+  border-color: var(--red);
+}
+.mmenu.open .mm-close {
+  animation: mmSpin 0.9s var(--ease) 0.3s both;
+}
+@keyframes mmSpin {
+  from {
+    transform: rotate(-180deg) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* links */
+.mmenu-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+}
+.mmenu-nav a {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: clamp(10px, 2.2vh, 18px) 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 9vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.92);
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  transform: translateY(46px) skewY(4deg);
+  transform-origin: left bottom;
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s var(--ease),
+    color 0.3s;
+}
+.mmenu.open .mmenu-nav a {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.8s ease calc(0.35s + var(--i) * 0.07s),
+    transform 1s var(--ease) calc(0.35s + var(--i) * 0.07s),
+    color 0.3s;
+}
+.mmenu-nav a small {
+  font-family: "Inter", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--red-light);
+}
+.mmenu-nav a b {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 1.3rem;
+  color: var(--red-light);
+  opacity: 0;
+  transform: translateX(-12px);
+  transition:
+    opacity 0.3s,
+    transform 0.4s var(--ease);
+}
+/* animated underline that sweeps in */
+.mmenu-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--red-light), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease);
+}
+.mmenu-nav a.active,
+.mmenu-nav a:active {
+  color: #fff;
+}
+.mmenu-nav a.active span {
+  background: linear-gradient(100deg, #fff 20%, var(--red-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-style: italic;
+}
+.mmenu-nav a.active::after,
+.mmenu-nav a:active::after {
+  transform: scaleX(1);
+}
+.mmenu-nav a.active b,
+.mmenu-nav a:active b {
+  opacity: 1;
+  transform: none;
+}
+
+/* footer */
+.mmenu-foot {
+  padding-top: 22px;
+}
+.mm-actions,
+.mm-contact {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.3s,
+    transform 0.4s var(--ease);
+}
+.mmenu.open .mm-actions,
+.mmenu.open .mm-contact {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.8s ease calc(0.35s + var(--i) * 0.07s),
+    transform 1s var(--ease) calc(0.35s + var(--i) * 0.07s);
+}
+.mm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 12px;
+}
+.mm-actions .btn {
+  justify-content: center;
+  padding: 14px 12px;
+  min-height: 50px;
+}
+.btn-ghost-light {
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+}
+.btn-ghost-light:hover {
+  border-color: var(--red-light);
+  color: var(--red-light);
+}
+.mm-contact {
+  display: grid;
+  gap: 2px;
+  margin-top: 18px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  word-break: break-word;
+}
+
+@media (max-width: 820px) {
+  .mmenu {
+    display: block;
+  }
+}
+@media (max-height: 560px) {
+  .mmenu-nav a {
+    font-size: 1.6rem;
+    padding: 8px 4px;
+  }
+  .mm-drop {
+    display: none;
+  }
+}
+
+body.menu-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1265,6 +1660,13 @@ footer a:hover {
   }
   .reveal,
   .hero-title .line > span {
+    opacity: 1;
+    transform: none;
+  }
+  .mmenu-nav a,
+  .mm-actions,
+  .mm-contact,
+  .mmenu-top {
     opacity: 1;
     transform: none;
   }
