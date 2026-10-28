@@ -101,7 +101,7 @@
         <button type="submit" class="btn btn-primary su-next">Continue</button>
       </div>`;
 
-    let order = [0, 1, 2], pos = 0, google = null;
+    let order = [0, 1, 2], pos = 0, minPos = 0, google = null;
 
     /* ---------- helpers ---------- */
     const fieldErr = (el, msg) => {
@@ -174,7 +174,7 @@
       prog.style.setProperty('--p', order.length > 1 ? pos / (order.length - 1) : 0);
       form.style.setProperty('--dir', dir);
       $$('.su-step', form).forEach(s => s.classList.toggle('is-active', +s.dataset.step === order[pos]));
-      $('.su-back', form).hidden = pos === 0;
+      $('.su-back', form).hidden = pos <= minPos;
       $('.su-next', form).textContent = pos === order.length - 1 ? (google ? 'Finish setup' : 'Create account') : 'Continue';
       if (focus) {
         const f = $$('.su-step.is-active input,.su-step.is-active select', form)
@@ -184,7 +184,7 @@
     }
 
     function reset() {
-      google = null; order = [0, 1, 2]; pos = 0;
+      google = null; order = [0, 1, 2]; pos = 0; minPos = 0;
       form.reset();
       $$('.field.is-invalid', form).forEach(f => f.classList.remove('is-invalid'));
       $$('.error,.su-err', form).forEach(e => { e.textContent = ''; });
@@ -201,15 +201,14 @@
     function completeProfile(p = {}) {
       reset();
       google = { ...p };
-      const known = p.firstName && p.lastName && p.email;
-      order = known ? [1, 2] : [0, 1, 2];
+      /* Google sign-in completes the Account step: start at Role with step 1 marked done. */
+      pos = 1; minPos = 1;
       $('#suFirst', form).value = p.firstName || '';
       $('#suLast', form).value = p.lastName || '';
       $('#suEmail', form).value = p.email || '';
-      $('#suEmail', form).readOnly = !!p.email;
       $('.su-pw', form).hidden = true;
       const n = $('.su-note', form);
-      n.textContent = p.email ? `Signed in with Google as ${p.email}. Add a few details to finish.` : 'Signed in with Google. Add a few details to finish.';
+      n.textContent = p.email ? `Signed in with Google as ${p.email}. Choose your role to finish.` : 'Google account connected. Choose your role to finish.';
       n.hidden = false;
       const tab = $('[data-tab="signup"]');
       if (tab) tab.click();
@@ -241,13 +240,13 @@
       }));
 
       const set = (id, fn) => { const el = $(id); if (el) fn(el); };
-      set('#authName', el => { el.textContent = 'Welcome, ' + profile.firstName; });
+      set('#authName', el => { el.textContent = profile.firstName ? 'Welcome, ' + profile.firstName : 'Welcome'; });
       set('#authEmail', el => { el.textContent = profile.email; });
-      set('#authAvatar', el => { el.textContent = (profile.firstName[0] || '?').toUpperCase(); });
+      set('#authAvatar', el => { el.textContent = (profile.firstName[0] || profile.email[0] || 'L').toUpperCase(); });
       set('#authGuest', el => { el.hidden = true; });
       set('#authUser', el => { el.hidden = false; });
       set('#toast', t => {
-        t.textContent = 'Welcome to LifeDrop, ' + profile.firstName + '.';
+        t.textContent = 'Welcome to LifeDrop' + (profile.firstName ? ', ' + profile.firstName : '') + '.';
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3200);
       });
@@ -262,7 +261,7 @@
       if (pos < order.length - 1) { pos++; paint(1, true); } else finish();
     }, true);
 
-    $('.su-back', form).addEventListener('click', () => { if (pos > 0) { pos--; paint(-1, true); } });
+    $('.su-back', form).addEventListener('click', () => { if (pos > minPos) { pos--; paint(-1, true); } });
 
     form.addEventListener('input', e => {
       const el = e.target;
