@@ -329,6 +329,22 @@
                         <label for="emHospital">Hospital / location</label>
                         <small class="error"></small>
                     </div>
+                    <fieldset class="when-group">
+                        <legend>Needed on</legend>
+                        <label class="when-opt">
+                            <input type="radio" name="emDay" value="Today" checked>
+                            <span>Today</span>
+                        </label>
+                        <label class="when-opt">
+                            <input type="radio" name="emDay" value="Tomorrow">
+                            <span>Tomorrow</span>
+                        </label>
+                    </fieldset>
+                    <div class="field">
+                        <input type="time" id="emTime" required>
+                        <label for="emTime">Time</label>
+                        <small class="error"></small>
+                    </div>
                     <div class="field">
                         <input type="tel" id="emPhone" placeholder=" " required>
                         <label for="emPhone">Contact number</label>
@@ -337,6 +353,23 @@
                     <button type="submit"
                         class="btn btn-emergency btn-block">Send Alert</button>
                 </form>
+            </div>
+        </div>
+
+
+        <!-- Emergency confirmation -->
+        <div class="modal" id="confirmModal" aria-hidden="true">
+            <div class="modal-backdrop" data-cclose></div>
+            <div class="modal-box confirm-box" role="alertdialog" aria-modal="true"
+                aria-labelledby="cfTitle" aria-describedby="cfDesc">
+                <h3 id="cfTitle">Confirm emergency alert</h3>
+                <p id="cfDesc">Please check the details below. Matching donors
+                    will be alerted immediately.</p>
+                <dl class="confirm-list" id="confirmList"></dl>
+                <div class="confirm-actions">
+                    <button type="button" class="btn btn-outline" data-cclose>Go back</button>
+                    <button type="button" class="btn btn-emergency" id="confirmSend">Confirm &amp; Send</button>
+                </div>
             </div>
         </div>
 
