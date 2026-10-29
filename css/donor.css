@@ -209,3 +209,54 @@ aside.on{transform:none}
 .ch-b{grid-template-columns:1fr;gap:18px}.ch-t .num{font-size:48px}.cr{grid-template-columns:76px 1fr 30px 36px;gap:8px;padding:6px 4px}
 .lmap{height:260px}
 }
+
+/* ===== Light theme (same look as index.html) ===== */
+html.light{--bg:#fff8f8;--p:#fff;--b:rgba(20,9,12,.09);--t:#14090c;--m:#7a6a6e;--r:#e11d34;--rl:#ff4d5e;color-scheme:light}
+html.light body{background:var(--bg);color:var(--t)}
+html.light em{color:var(--r)}
+html.light .aurora{background:radial-gradient(55% 50% at 92% 0,rgba(255,77,94,.28),transparent 65%),radial-gradient(45% 40% at 0 100%,rgba(255,77,94,.12),transparent 70%)}
+html.light .curtain i{background:#fff8f8}
+html.light aside{background:rgba(255,248,248,.85);box-shadow:8px 0 30px -18px rgba(20,9,12,.25)}
+html.light #nav button:hover,html.light #logout:hover{background:rgba(225,29,52,.06)}
+html.light #nav button.on{color:var(--r);background:linear-gradient(90deg,rgba(225,29,52,.14),rgba(225,29,52,.02))}
+html.light .top{background:rgba(255,248,248,.8)}
+html.light #burger{background:#fff}
+html.light .sw i{background:rgba(20,9,12,.18)}html.light .sw input:checked+i{background:var(--r)}
+html.light .card{background:#fff;border-color:var(--b);box-shadow:0 10px 40px -22px rgba(20,9,12,.3)}
+html.light .card:hover{border-color:rgba(225,29,52,.28);box-shadow:0 20px 50px -20px rgba(163,0,21,.35)}
+html.light .card::before{inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--rl),#a30015);opacity:1;transform:scaleX(0);transform-origin:left;transition:transform .6s var(--e)}
+html.light .card:hover::before{transform:scaleX(1)}
+html.light .chat:hover::before{transform:scaleX(0)}
+html.light .eb{color:var(--r)}
+html.light .bar2,html.light .tk{background:rgba(20,9,12,.07)}
+html.light .ring circle{stroke:rgba(20,9,12,.08)}html.light .ring .fg{stroke:var(--r);filter:none}
+html.light .st.ok,html.light .dl .up{color:#138a52}html.light .st.wait{color:#b26a00}html.light .dl .dn{color:#c4001d}
+html.light .row,html.light .tag,html.light .chips span,html.light .bd div,html.light .kv div,html.light .m{background:rgba(20,9,12,.05)}
+html.light .row:hover{background:rgba(225,29,52,.09)}
+html.light .tag.hot{background:rgba(225,29,52,.12);color:#b4001a}html.light .tag.ok{background:rgba(19,138,82,.12);color:#138a52}
+html.light .chips span.me{background:var(--r);color:#fff}
+html.light .bd div:not(.lock){background:rgba(225,29,52,.09);box-shadow:inset 0 0 0 1px rgba(225,29,52,.25)}
+html.light .btn:not(.g),html.light .pills button.on,html.light .hl button.on,html.light .m.me,html.light .you{color:#fff}
+html.light .btn{box-shadow:0 12px 28px -10px var(--r)}
+html.light .btn.g{background:#fff;color:var(--t);border-color:rgba(20,9,12,.15)}html.light .btn.g:hover{border-color:var(--r);color:var(--r)}
+html.light .pills button{background:#fff}html.light .pills button.on{box-shadow:0 10px 24px -10px var(--r)}
+html.light .sel{background:#fff}html.light .sel select option{background:#fff;color:#14090c}
+html.light .ch-t{background:linear-gradient(160deg,rgba(225,29,52,.13),rgba(225,29,52,.02));border-color:rgba(225,29,52,.2)}
+html.light .mini i{background:rgba(20,9,12,.14)}html.light .mini button:hover i{background:rgba(20,9,12,.28)}html.light .mini .on i{background:linear-gradient(var(--rl),var(--r));box-shadow:0 4px 12px -2px var(--r)}
+html.light .fl{box-shadow:0 4px 12px -4px var(--c)}
+html.light .cr:hover{background:rgba(20,9,12,.04)}
+html.light .lmap,html.light .leaflet-container{background:#fdeced}
+html.light .leaflet-control-attribution{background:rgba(255,255,255,.8)!important}
+html.light .leaflet-bar a,html.light .leaflet-bar a:hover{background:#fff;color:#14090c;border-color:var(--b)}
+html.light .cl button.on,html.light .cl button:hover{background:rgba(225,29,52,.08)}
+html.light .cf input{background:#fff;border-color:rgba(20,9,12,.15)}
+html.light .mod{background:rgba(20,9,12,.45)}
+html.light .x{background:#fff;border:1px solid var(--b)}
+html.light #toast{background:#14090c;color:#fff;border-color:transparent}
+/* mobile drawer stays dark, like the home page menu */
+@media(max-width:900px){
+html.light aside{--t:#f7eff1;--m:#a8959a;--p:rgba(255,255,255,.05);--b:rgba(255,255,255,.1);color:var(--t);background:radial-gradient(120% 70% at 100% 0,#3a0510,transparent 60%),linear-gradient(170deg,#1d0a0f,#0d0407)}
+html.light aside #nav button:hover,html.light aside #logout:hover{background:rgba(255,255,255,.06)}
+html.light aside #nav button.on{color:#fff;background:linear-gradient(90deg,rgba(225,29,52,.35),rgba(225,29,52,.04))}
+html.light aside em{color:var(--rl)}
+}
