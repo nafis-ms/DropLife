@@ -196,7 +196,7 @@ aside.on{transform:none}
 .scrim{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;transition:.4s}
 .scrim.on{opacity:1;visibility:visible}
 .main{margin-left:0;padding:0 16px calc(32px + env(safe-area-inset-bottom))}
-#burger{display:grid}.top h1{font-size:21px}.top-sw span{display:none}
+#burger{display:grid}.top h1{font-size:21px}
 .grid>*{grid-column:1/-1!important}
 .hero .gb{display:none}
 .card{padding:18px}
