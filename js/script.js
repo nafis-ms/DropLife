@@ -522,8 +522,25 @@
   // Replace these two functions with real calls to your backend.
   // They must resolve to { name, email, picture? } or throw an Error.
   const authApi = {
-    async login({ email }) {
+    async login({ email, password }) {
       await new Promise((r) => setTimeout(r, 700));
+      // Demo donor account: donor@demo.com / 12345678
+      if (email.toLowerCase() === "donor@demo.com") {
+        if (password !== "12345678") throw new Error("Incorrect email or password.");
+        try {
+          localStorage.setItem("lifedrop_profile", JSON.stringify({
+            firstName: "Demo", lastName: "Donor", email: "donor@demo.com", role: "donor", provider: "demo", since: 2024,
+            details: { donorGroup: "O+", suDPhone: "+880 1700 000000", suDCountry: "Bangladesh", suDCity: "Dhaka",
+              suDDistrict: "Dhaka", suDStreet: "House 12, Road 5, Dhanmondi", suDLast: "3 to 6 months ago", available: true },
+          }));
+        } catch (_) {}
+        return { name: "Demo Donor", email, role: "donor" };
+      }
+      // A donor who signed up on this device goes back to their dashboard.
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem("lifedrop_profile") || "null"); } catch (_) {}
+      if (saved && saved.role === "donor" && (saved.email || "").toLowerCase() === email.toLowerCase())
+        return { name: `${saved.firstName} ${saved.lastName}`.trim() || email.split("@")[0], email, role: "donor" };
       return { name: email.split("@")[0], email };
     },
     async signup({ name, email }) {
@@ -583,6 +600,10 @@
     try {
       localStorage.setItem("lifedrop-user", JSON.stringify(user));
     } catch (_) {}
+    if (user.role === "donor") {
+      location.href = "donor.html";
+      return;
+    }
     paint();
     loginForm.reset();
     signupForm.reset();

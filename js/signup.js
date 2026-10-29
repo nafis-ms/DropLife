@@ -239,6 +239,13 @@
         detail: { ...profile, password: google ? undefined : $('#suPass', form).value }
       }));
 
+      /* Donors go straight to their dashboard. */
+      if (r === 'donor') {
+        try { localStorage.setItem('lifedrop-user', JSON.stringify({ name: (profile.firstName + ' ' + profile.lastName).trim() || profile.email, email: profile.email, role: 'donor' })); } catch (e) { /* storage unavailable */ }
+        location.href = 'donor.html';
+        return;
+      }
+
       const set = (id, fn) => { const el = $(id); if (el) fn(el); };
       set('#authName', el => { el.textContent = profile.firstName ? 'Welcome, ' + profile.firstName : 'Welcome'; });
       set('#authEmail', el => { el.textContent = profile.email; });
