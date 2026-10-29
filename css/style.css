@@ -1129,18 +1129,32 @@ footer a:hover {
 }
 .modal-close {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  font-size: 2rem;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0 0 3px;
+  border-radius: 50%;
+  font-size: 1.7rem;
   line-height: 1;
   color: var(--muted);
+  cursor: pointer;
   transition:
     transform 0.3s,
-    color 0.3s;
+    color 0.3s,
+    background 0.3s;
 }
 .modal-close:hover {
   transform: rotate(90deg);
   color: var(--red);
+  background: var(--bg-alt);
+}
+.modal-close:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
 }
 
 /* toast / to-top */
@@ -1653,11 +1667,26 @@ body.menu-open {
    Auth modal
    ============================================================ */
 .auth-box {
+  --pad-t: 34px;
+  --pad-x: 30px;
   max-height: 92vh;
   max-height: 92dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 34px 30px 30px;
+  padding: var(--pad-t) var(--pad-x) 30px;
+}
+/* The box scrolls, so keep the close button pinned to its top-right corner
+   instead of letting it scroll away or get clipped. */
+.auth-box > .modal-close {
+  position: sticky;
+  top: 12px;
+  right: auto;
+  float: right;
+  margin: calc(12px - var(--pad-t)) calc(12px - var(--pad-x)) -38px 0;
+  background: #fff;
+}
+.auth-box > .modal-close:hover {
+  background: var(--bg-alt);
 }
 .auth-box h3 {
   padding-right: 30px;
@@ -1795,7 +1824,9 @@ body.menu-open {
 }
 @media (max-width: 520px) {
   .auth-box {
-    padding: 30px 22px 24px;
+    --pad-t: 30px;
+    --pad-x: 22px;
+    padding: var(--pad-t) var(--pad-x) 24px;
   }
 }
 
