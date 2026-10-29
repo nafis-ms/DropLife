@@ -262,17 +262,29 @@
   /*  Blood group compatibility  */
   const picker = $("#groupPicker");
   const result = $("#compatResult");
+  const DEFAULT_COMPAT_TEXT = result.innerHTML;
   GROUPS.forEach((g) => {
     const b = document.createElement("button");
     b.className = "group-btn";
     b.type = "button";
     b.textContent = g;
+    b.setAttribute("aria-pressed", "false");
     b.addEventListener("click", () => {
-      $$(".group-btn", picker).forEach((x) => x.classList.remove("active"));
-      b.classList.add("active");
+      // clicking the selected group again clears it
+      const wasActive = b.classList.contains("active");
+      $$(".group-btn", picker).forEach((x) => {
+        x.classList.remove("active");
+        x.setAttribute("aria-pressed", "false");
+      });
+      if (!wasActive) {
+        b.classList.add("active");
+        b.setAttribute("aria-pressed", "true");
+      }
       result.style.opacity = 0;
       setTimeout(() => {
-        result.innerHTML = `<strong>${g}</strong> can donate to: ${CAN_DONATE_TO[g].join(", ")}`;
+        result.innerHTML = wasActive
+          ? DEFAULT_COMPAT_TEXT
+          : `<strong>${g}</strong> can donate to: ${CAN_DONATE_TO[g].join(", ")}`;
         result.style.opacity = 1;
       }, 200);
     });
