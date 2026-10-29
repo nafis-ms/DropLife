@@ -704,10 +704,6 @@ header.scrolled {
   padding: 0.08em 0.1em 0.2em;
   margin: -0.08em -0.1em -0.2em;
 }
-.rot-word:last-child {
-  color: var(--red);
-  font-style: italic;
-}
 .rot-word.is-active {
   visibility: visible;
 }
