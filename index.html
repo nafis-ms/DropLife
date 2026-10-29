@@ -239,7 +239,7 @@
                     <h2>Someone is waiting for your drop.</h2>
                     <p>It takes about an hour. It could give someone a
                         lifetime.</p>
-                    <a href="#Contact" class="btn btn-light">Join LifeDrop
+                    <a href="#Contact" class="btn btn-light" data-open-signup>Join LifeDrop
                         today</a>
                 </div>
             </section>
@@ -308,6 +308,12 @@
                 <p>Tell us what is needed. We will alert matching donors
                     immediately.</p>
                 <form id="emergencyForm" novalidate>
+                    <div class="field">
+                        <input type="text" id="emPatient" placeholder=" "
+                            autocomplete="off" required>
+                        <label for="emPatient">Patient name</label>
+                        <small class="error"></small>
+                    </div>
                     <div class="field">
                         <select id="emGroup" required>
                             <option value disabled selected></option>
