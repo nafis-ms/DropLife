@@ -731,6 +731,76 @@
   });
   if (!reduceMotion) loop();
 
+  /*  About heading: cinematic rotating text  */
+  (() => {
+    const h = $("#aboutRotator");
+    // Reduced motion / no element: keep the plain, static heading.
+    if (!h || reduceMotion) return;
+
+    const words = ["Simple.", "Fast.", "Life-saving."];
+    const HOLD = 2300; // how long each word stays on screen (ms)
+    const LEAVE = 700; // exit duration (ms)
+
+    // Real heading text stays available to screen readers / search engines.
+    const sr = document.createElement("span");
+    sr.className = "rot-sr";
+    sr.textContent = words.join(" ");
+
+    const stage = document.createElement("span");
+    stage.className = "rot-stage";
+    stage.setAttribute("aria-hidden", "true");
+    const wordEls = words.map((w) => {
+      const el = document.createElement("span");
+      el.className = "rot-word";
+      el.innerHTML = [...w]
+        .map((ch, i) => `<span class="rot-ch" style="--i:${i}">${ch}</span>`)
+        .join("");
+      stage.appendChild(el);
+      return el;
+    });
+    h.replaceChildren(sr, stage);
+
+    // progress rail under the heading
+    const rail = document.createElement("div");
+    rail.className = "rot-rail";
+    rail.setAttribute("aria-hidden", "true");
+    rail.style.setProperty("--hold", HOLD + LEAVE + "ms");
+    const segs = words.map(() => {
+      const seg = document.createElement("i");
+      rail.appendChild(seg);
+      return seg;
+    });
+    h.after(rail);
+
+    let idx = 0;
+    let visible = false;
+    let idle = true;
+
+    const show = (n) => {
+      idle = false;
+      wordEls[n].classList.add("is-active");
+      segs.forEach((sg, i) => sg.classList.toggle("on", i === n));
+      setTimeout(() => leave(n), HOLD);
+    };
+    const leave = (n) => {
+      wordEls[n].classList.add("is-leaving");
+      setTimeout(() => {
+        wordEls[n].classList.remove("is-active", "is-leaving");
+        idx = (n + 1) % words.length;
+        if (visible) show(idx);
+        else idle = true; // off-screen: wait, saves battery
+      }, LEAVE);
+    };
+
+    new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting;
+        if (visible && idle) show(idx);
+      },
+      { threshold: 0.35 },
+    ).observe(h);
+  })();
+
   /*  Footer year  */
   $("#year").textContent = new Date().getFullYear();
 })();
