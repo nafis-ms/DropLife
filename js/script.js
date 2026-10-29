@@ -738,8 +738,8 @@
     if (!h || reduceMotion) return;
 
     const words = ["Simple.", "Super Fast.", "Reliable.", "Life-saving."];
-    const HOLD = 2100; // how long each word stays on screen (ms)
-    const LEAVE = 1000; // exit duration (ms)
+    const HOLD = 2200; // how long each word stays on screen (ms)
+    const LEAVE = 900; // exit duration (ms)
 
     // Real heading text stays available to screen readers / search engines.
     const sr = document.createElement("span");
@@ -758,7 +758,10 @@
         .map(
           (tok) =>
             `<span class="rot-tok">${[...tok]
-              .map((ch) => `<span class="rot-ch" style="--i:${n++}">${ch}</span>`)
+              .map(
+                (ch) =>
+                  `<span class="rot-ch" style="--i:${n++}"><span class="rot-in">${ch}</span></span>`,
+              )
               .join("")}</span>`,
         )
         .join(" ");
@@ -767,18 +770,6 @@
     });
     h.replaceChildren(sr, stage);
 
-    // progress rail under the heading
-    const rail = document.createElement("div");
-    rail.className = "rot-rail";
-    rail.setAttribute("aria-hidden", "true");
-    rail.style.setProperty("--hold", HOLD + LEAVE + "ms");
-    const segs = words.map(() => {
-      const seg = document.createElement("i");
-      rail.appendChild(seg);
-      return seg;
-    });
-    h.after(rail);
-
     let idx = 0;
     let visible = false;
     let idle = true;
@@ -786,7 +777,6 @@
     const show = (n) => {
       idle = false;
       wordEls[n].classList.add("is-active");
-      segs.forEach((sg, i) => sg.classList.toggle("on", i === n));
       setTimeout(() => leave(n), HOLD);
     };
     const leave = (n) => {
