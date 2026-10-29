@@ -203,7 +203,6 @@ ${chartHTML()}
   $('#nav').innerHTML = NAV.map(([k, t, p]) => `<button type="button" data-v="${k}">${ic(p)}<span>${t}</span></button>`).join('');
   $('#logout').innerHTML = ic('<path d="M9 4H4v16h5M16 8l4 4-4 4M20 12H9"/>') + '<span>Log out</span>';
   $('#av').textContent = (me.first[0] || 'D').toUpperCase();
-  $('#avail').checked = ST.avail;
   document.body.classList.toggle('calm', !!ST.calm);
 
   $('#nav').addEventListener('click', e => {
@@ -222,8 +221,7 @@ ${chartHTML()}
   $('#modal').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('[data-x]')) closeProf(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeProf(); side(false); } });
 
-  const setAvail = v => { ST.avail = v; W('ld_set', ST); $('#avail').checked = v; const k = $('[data-k=avail]'); if (k) k.checked = v; toast(v ? 'You are now visible to nearby requests' : 'You are hidden from new requests'); };
-  $('#avail').onchange = e => setAvail(e.target.checked);
+  const setAvail = v => { ST.avail = v; W('ld_set', ST); const k = $('[data-k=avail]'); if (k) k.checked = v; toast(v ? 'You are now visible to nearby requests' : 'You are hidden from new requests'); };
 
   $('#view').addEventListener('click', e => {
     const t = e.target, q = s => t.closest(s);
