@@ -737,9 +737,9 @@
     // Reduced motion / no element: keep the plain, static heading.
     if (!h || reduceMotion) return;
 
-    const words = ["Simple.", "Fast.", "Life-saving."];
-    const HOLD = 2300; // how long each word stays on screen (ms)
-    const LEAVE = 700; // exit duration (ms)
+    const words = ["Simple.", "Super Fast.", "Reliable.", "Life-saving."];
+    const HOLD = 2100; // how long each word stays on screen (ms)
+    const LEAVE = 950; // exit duration (ms)
 
     // Real heading text stays available to screen readers / search engines.
     const sr = document.createElement("span");
@@ -752,9 +752,16 @@
     const wordEls = words.map((w) => {
       const el = document.createElement("span");
       el.className = "rot-word";
-      el.innerHTML = [...w]
-        .map((ch, i) => `<span class="rot-ch" style="--i:${i}">${ch}</span>`)
-        .join("");
+      let n = 0; // running letter index so the stagger flows across words
+      el.innerHTML = w
+        .split(" ")
+        .map(
+          (tok) =>
+            `<span class="rot-tok">${[...tok]
+              .map((ch) => `<span class="rot-ch" style="--i:${n++}">${ch}</span>`)
+              .join("")}</span>`,
+        )
+        .join(" ");
       stage.appendChild(el);
       return el;
     });
