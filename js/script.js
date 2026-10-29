@@ -529,6 +529,16 @@
   $$("button[data-tab]", tabsEl).forEach((b) =>
     b.addEventListener("click", () => setTab(b.dataset.tab)),
   );
+  // "Become a Donor" -> open the Sign up tab. If already signed in, fall
+  // through to the normal link (scrolls to the donors section).
+  $$("[data-open-signup]").forEach((b) =>
+    b.addEventListener("click", (e) => {
+      if (session) return;
+      e.preventDefault();
+      setTab("signup");
+      setAuthModal(true);
+    }),
+  );
   $$(".pw-toggle", authModal).forEach((t) =>
     t.addEventListener("click", () => {
       const inp = $("input", t.parentElement);
