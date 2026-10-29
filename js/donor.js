@@ -10,7 +10,7 @@
   /* ---------- data ---------- */
   const D = P.details || {}, G = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const CAN = { 'O-': G, 'O+': ['O+', 'A+', 'B+', 'AB+'], 'A-': ['A-', 'A+', 'AB-', 'AB+'], 'A+': ['A+', 'AB+'], 'B-': ['B-', 'B+', 'AB-', 'AB+'], 'B+': ['B+', 'AB+'], 'AB-': ['AB-', 'AB+'], 'AB+': ['AB+'] };
-  const ST = Object.assign({ alerts: true, loc: true, calm: false, light: false, sort: 'time', avail: D.available !== false }, J('ld_set') || {});
+  const ST = Object.assign({ alerts: true, loc: true, calm: false, light: true, sort: 'time', avail: D.available !== false }, J('ld_set') || {});
   const HIST = P.provider === 'demo' ? [
     { d: '2026-06-18', h: 'Square Hospitals', u: 1 }, { d: '2026-02-09', h: 'Dhaka Medical College Hospital', u: 1 },
     { d: '2025-10-03', h: 'United Hospital', u: 1 }, { d: '2025-05-21', h: 'BSMMU Blood Bank', u: 1 },
@@ -137,8 +137,8 @@ ${chartHTML()}
   }
 
   const TG = [['avail', 'Available to donate', 'Show me to hospitals and patients nearby.'], ['alerts', 'Urgent request alerts', 'Notify me when a matching blood request is posted.'],
-    ['loc', 'Share approximate location', 'Used to sort requests and hospitals by distance.'], ['light', 'Light mode', 'Use the bright look from the LifeDrop home page.'], ['calm', 'Reduce motion', 'Tone down animations and effects.']];
-  const set = () => `<section class="card" style="--i:0;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${ST[k] ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
+    ['loc', 'Share approximate location', 'Used to sort requests and hospitals by distance.'], ['dark', 'Dark Mode', 'Switch to the dark cinematic look.'], ['calm', 'Reduce motion', 'Tone down animations and effects.']];
+  const set = () => `<section class="card" style="--i:0;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
 
   const V = { dash, feed, msgs, hist, set };
 
@@ -240,9 +240,10 @@ ${chartHTML()}
     if (e.target.id === 'mo') return setMonth(+e.target.value);
     const k = e.target.dataset.k; if (!k) return;
     if (k === 'avail') return setAvail(e.target.checked);
-    ST[k] = e.target.checked; W('ld_set', ST);
+    if (k === 'dark') ST.light = !e.target.checked; else ST[k] = e.target.checked;
+    W('ld_set', ST);
     if (k === 'calm') document.body.classList.toggle('calm', ST.calm);
-    if (k === 'light') theme();
+    if (k === 'dark') theme();
     toast('Setting saved');
   });
   $('#view').addEventListener('submit', e => {
