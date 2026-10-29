@@ -739,7 +739,7 @@
 
     const words = ["Simple.", "Super Fast.", "Reliable.", "Life-saving."];
     const HOLD = 2100; // how long each word stays on screen (ms)
-    const LEAVE = 950; // exit duration (ms)
+    const LEAVE = 1000; // exit duration (ms)
 
     // Real heading text stays available to screen readers / search engines.
     const sr = document.createElement("span");
