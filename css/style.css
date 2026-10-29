@@ -442,9 +442,15 @@ header.scrolled {
 }
 .hero-title em {
   font-style: italic;
+  display: inline-block;
+  /* italic glyphs overhang their box; extend it so the gradient
+     (background-clip: text) and the .line overflow don't cut off the "e" */
+  padding: 0 0.14em 0.08em 0.04em;
+  margin: 0 -0.14em -0.08em -0.04em;
   background: linear-gradient(120deg, var(--red-light), var(--red-dark));
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
 }
 @keyframes lineUp {
