@@ -385,12 +385,25 @@
     modal.setAttribute("aria-hidden", !open);
     document.body.classList.toggle("locked", open);
   };
+  // Confirmation dialog shown on top of the emergency form. The page is already
+  // scroll-locked by the emergency modal, so this only toggles its own state.
+  const confirmModal = $("#confirmModal");
+  const setConfirm = (open) => {
+    confirmModal.classList.toggle("open", open);
+    confirmModal.setAttribute("aria-hidden", !open);
+    if (open) setTimeout(() => $("#confirmSend").focus({ preventScroll: true }), 450);
+  };
+  $$("[data-cclose]", confirmModal).forEach((el) =>
+    el.addEventListener("click", () => setConfirm(false)),
+  );
   $("#emergencyBtn").addEventListener("click", () => setModal(true));
   $$("[data-close]", modal).forEach((el) =>
     el.addEventListener("click", () => setModal(false)),
   );
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") setModal(false);
+    if (e.key !== "Escape") return;
+    if (confirmModal.classList.contains("open")) setConfirm(false);
+    else setModal(false);
   });
 
   /*  Forms  */
@@ -427,10 +440,63 @@
     e.target.reset();
     toast("Message sent. We will reply soon.");
   });
-  $("#emergencyForm").addEventListener("submit", (e) => {
+  const emForm = $("#emergencyForm");
+  const emTime = $("#emTime");
+  const clearTimeError = () => {
+    const f = emTime.closest(".field");
+    f.classList.remove("invalid");
+    $(".error", f).textContent = "";
+  };
+  // switching day (or editing the time) clears a "time has passed" error
+  $$('input[name="emDay"]', emForm).forEach((r) =>
+    r.addEventListener("change", clearTimeError),
+  );
+  emForm.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!validate(e.target)) return;
-    e.target.reset();
+    // "Today" can't be a time that has already passed
+    if (e.target.elements.emDay.value === "Today") {
+      const [hh, mm] = emTime.value.split(":").map(Number);
+      const now = new Date();
+      if (hh * 60 + mm < now.getHours() * 60 + now.getMinutes()) {
+        const f = emTime.closest(".field");
+        f.classList.add("invalid");
+        $(".error", f).textContent = "That time has already passed. Pick a later time or choose Tomorrow.";
+        return;
+      }
+    }
+    openConfirm(e.target);
+  });
+
+  const to12h = (t) => {
+    const [h, m] = t.split(":").map(Number);
+    return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+  };
+  function openConfirm(form) {
+    const rows = [
+      ["Patient", $("#emPatient").value.trim()],
+      ["Blood group", $("#emGroup").value],
+      ["Hospital / location", $("#emHospital").value.trim()],
+      ["Needed on", `${form.elements.emDay.value}, ${to12h(emTime.value)}`],
+      ["Contact", $("#emPhone").value.trim()],
+    ];
+    const list = $("#confirmList");
+    list.replaceChildren(
+      ...rows.map(([k, v]) => {
+        const row = document.createElement("div");
+        const dt = document.createElement("dt");
+        const dd = document.createElement("dd");
+        dt.textContent = k; // textContent: user input is never parsed as HTML
+        dd.textContent = v;
+        row.append(dt, dd);
+        return row;
+      }),
+    );
+    setConfirm(true);
+  }
+  $("#confirmSend").addEventListener("click", () => {
+    emForm.reset();
+    setConfirm(false);
     setModal(false);
     toast("Emergency alert sent to matching donors.");
   });
