@@ -10,7 +10,7 @@
   /* ---------- data ---------- */
   const D = P.details || {}, G = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const CAN = { 'O-': G, 'O+': ['O+', 'A+', 'B+', 'AB+'], 'A-': ['A-', 'A+', 'AB-', 'AB+'], 'A+': ['A+', 'AB+'], 'B-': ['B-', 'B+', 'AB-', 'AB+'], 'B+': ['B+', 'AB+'], 'AB-': ['AB-', 'AB+'], 'AB+': ['AB+'] };
-  const ST = Object.assign({ alerts: true, loc: true, calm: false, sort: 'time', avail: D.available !== false }, J('ld_set') || {});
+  const ST = Object.assign({ alerts: true, loc: true, calm: false, light: false, sort: 'time', avail: D.available !== false }, J('ld_set') || {});
   const HIST = P.provider === 'demo' ? [
     { d: '2026-06-18', h: 'Square Hospitals', u: 1 }, { d: '2026-02-09', h: 'Dhaka Medical College Hospital', u: 1 },
     { d: '2025-10-03', h: 'United Hospital', u: 1 }, { d: '2025-05-21', h: 'BSMMU Blood Bank', u: 1 },
@@ -137,7 +137,7 @@ ${chartHTML()}
   }
 
   const TG = [['avail', 'Available to donate', 'Show me to hospitals and patients nearby.'], ['alerts', 'Urgent request alerts', 'Notify me when a matching blood request is posted.'],
-    ['loc', 'Share approximate location', 'Used to sort requests and hospitals by distance.'], ['calm', 'Reduce motion', 'Tone down animations and effects.']];
+    ['loc', 'Share approximate location', 'Used to sort requests and hospitals by distance.'], ['light', 'Light mode', 'Use the bright look from the LifeDrop home page.'], ['calm', 'Reduce motion', 'Tone down animations and effects.']];
   const set = () => `<section class="card" style="--i:0;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${ST[k] ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
 
   const V = { dash, feed, msgs, hist, set };
@@ -161,7 +161,7 @@ ${chartHTML()}
     const el = $('#lmap'); if (!el) return;
     if (!window.L) { el.innerHTML = '<p class="em">The map could not load. Check your connection.</p>'; return; }
     MAP = L.map(el, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(MAP);
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${ST.light ? 'light_all' : 'dark_all'}/{z}/{x}/{y}{r}.png`, { subdomains: 'abcd', maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(MAP);
     L.circle([ME.lat, ME.lng], { radius: 3000, color: '#6be6a4', weight: 1, fillOpacity: .05, interactive: false }).addTo(MAP);
     L.marker([ME.lat, ME.lng], { icon: L.divIcon({ className: '', html: '<div class="ud"></div>', iconSize: [16, 16] }), interactive: false, keyboard: false }).addTo(MAP);
     MK = HS.map((h, i) => L.marker([h.lat, h.lng], { title: h.n, icon: L.divIcon({ className: '', html: `<div class="mk${i ? '' : ' on'}"></div>`, iconSize: [24, 24] }) }).on('click', () => pick(i)).addTo(MAP));
@@ -204,6 +204,8 @@ ${chartHTML()}
   $('#logout').innerHTML = ic('<path d="M9 4H4v16h5M16 8l4 4-4 4M20 12H9"/>') + '<span>Log out</span>';
   $('#av').textContent = (me.first[0] || 'D').toUpperCase();
   document.body.classList.toggle('calm', !!ST.calm);
+  const theme = () => { document.documentElement.classList.toggle('light', !!ST.light); const m = $('meta[name=theme-color]'); if (m) m.content = ST.light ? '#fff8f8' : '#0b0508'; };
+  theme();
 
   $('#nav').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -240,6 +242,7 @@ ${chartHTML()}
     if (k === 'avail') return setAvail(e.target.checked);
     ST[k] = e.target.checked; W('ld_set', ST);
     if (k === 'calm') document.body.classList.toggle('calm', ST.calm);
+    if (k === 'light') theme();
     toast('Setting saved');
   });
   $('#view').addEventListener('submit', e => {
