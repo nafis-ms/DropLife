@@ -44,7 +44,6 @@
   const REPLY = ['Thank you so much, I really appreciate it.', 'Please come to the blood bank counter when you arrive.', 'May you be blessed. We will be waiting for you.'];
   let CV = J('ld_msgs') || { 1: { n: 'Tasnim Rahman', g: 'O+', m: [{ x: 'Assalamu alaikum, thank you for responding.' }, { x: 'Can you reach Square Hospitals today?' }] } };
   let act = null, cur = 'dash', first = true;
-  const OFF = new Set();
 
   /* ---------- helpers ---------- */
   const fd = d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -69,11 +68,27 @@
   }
 
   /* ---------- views ---------- */
-  const bars = () => {
-    const tot = DATA.map(r => r.reduce((a, v, i) => a + (OFF.has(i) ? 0 : v), 0)), mx = Math.max(...tot, 1);
-    return MO.map((m, j) => `<div class="col"><span>${tot[j]}</span><div class="bar" style="--k:${tot[j] / mx};--j:${j}">${DATA[j].map((v, i) => OFF.has(i) ? '' : `<i style="--f:${v};--c:${CL[i]}" title="${G[i]}: ${v} units"></i>`).join('')}</div><span>${m}</span></div>`).join('');
-  };
-  const mapInfo = i => { const h = HS[i]; return `<b>${h.n}</b><small>${h.km} km away · about ${Math.round(h.km * 3.5)} min by car</small><a class="dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lng}">Directions</a>`; };
+    const mapInfo = i => { const h = HS[i]; return `<b>${h.n}</b><small>${h.km} km away · about ${Math.round(h.km * 3.5)} min by car</small><a class="dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lng}">Directions</a>`; };
+
+  const MF = ['May', 'June', 'July', 'August', 'September', 'October'].map(m => m + ' 2026');
+  let SEL = MO.length - 1;
+  const tot = j => DATA[j].reduce((a, v) => a + v, 0);
+  const delta = j => { if (!j) return 'First month shown'; const d = tot(j) - tot(j - 1); return `<span class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '&#9650;' : '&#9660;'} ${Math.abs(Math.round(d / tot(j - 1) * 100))}%</span> vs ${MO[j - 1]}`; };
+  const tween = (el, a, b) => { el.dataset.n = b; const t0 = performance.now(), f = t => { const k = Math.min((t - t0) / 700, 1); el.textContent = Math.round(a + (b - a) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+  function chartHTML() {
+    const j = SEL, t = tot(j), mx = Math.max(...DATA[j]), mt = Math.max(...DATA.map((_, k) => tot(k)));
+    return `<section class="card c7 chart" style="--i:4"><div class="ch-h"><h3>Blood donated through <b>LifeDrop</b></h3><label class="sel"><span>Month</span><select id="mo" aria-label="Select month">${MF.map((m, k) => `<option value="${k}" ${k === j ? 'selected' : ''}>${m}</option>`).join('')}</select></label></div>
+<div class="ch-b"><div class="ch-t"><small>Total donated · units</small><div class="num" id="mt" data-n="${t}">0</div><p class="dl" id="md">${delta(j)}</p><div class="mini">${DATA.map((_, k) => `<button type="button" data-m="${k}" class="${k === j ? 'on' : ''}" aria-label="${MF[k]}"><i style="--h:${tot(k) / mt}"></i><span>${MO[k]}</span></button>`).join('')}</div></div>
+<div class="ch-l">${G.map((g, i) => `<div class="cr ${g === me.group ? 'mine' : ''}" data-r="${i}" style="--c:${CL[i]}"><span class="cg"><i></i>${g}${g === me.group ? ' <em class="you">You</em>' : ''}</span><div class="tk"><div class="fl" style="--w:${DATA[j][i] / mx * 100}%"></div></div><b data-n="${DATA[j][i]}">0</b><small>${Math.round(DATA[j][i] / t * 100)}%</small></div>`).join('')}</div></div></section>`;
+  }
+  function setMonth(j) {
+    if (j === SEL) return;
+    const p = SEL, t = tot(j), mx = Math.max(...DATA[j]); SEL = j;
+    $('#mo').value = j;
+    $$('.mini button').forEach((b, k) => b.classList.toggle('on', k === j));
+    tween($('#mt'), tot(p), t); $('#md').innerHTML = delta(j);
+    DATA[j].forEach((v, i) => { const r = $(`[data-r="${i}"]`); $('.fl', r).style.setProperty('--w', v / mx * 100 + '%'); tween($('b', r), DATA[p][i], v); $('small', r).textContent = Math.round(v / t * 100) + '%'; });
+  }
 
   function dash() {
     const e = elig(), n = HIST.length, units = HIST.reduce((a, h) => a + (h.u || 1), 0), ms = [1, 5, 10, 25].find(m => m > n) || n;
@@ -84,7 +99,7 @@
 <section class="card c4" style="--i:1"><h3>Fit to donate?</h3><div class="ringw"><svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/><circle class="fg" cx="50" cy="50" r="42" style="--v:${e.p}"/></svg><div class="rc"><b>${e.ok ? 'Ready' : e.left}</b><small>${e.ok ? 'to donate' : 'days left'}</small></div></div><p class="st ${e.ok ? 'ok' : 'wait'}">${e.ok ? 'You are fit to donate again' : 'Next donation on ' + e.next}</p><small>Last donation: ${esc(e.last)} · 90-day gap</small></section>
 <section class="card c4" style="--i:2"><h3>Times donated</h3><div class="num" data-n="${n}">0</div><p>About <b data-n="${n * 3}">0</b> lives impacted · ${units} unit${units === 1 ? '' : 's'}</p><div class="bar2"><i style="--w:${Math.min(100, n / ms * 100)}%"></i></div><small>${n >= 25 ? 'Top milestone reached' : (ms - n) + ' more to reach ' + ms + ' donations'}</small></section>
 <section class="card c4" style="--i:3"><h3>Urgent patients</h3>${urg.map(f => `<div class="row" data-chat="${f.id}"><span class="gb s">${f.g}</span><div><b>${esc(f.n)}</b><small>${esc(f.h)} · ${f.km} km</small></div><span class="tm">${du(f.due)}</span></div>`).join('')}<button class="btn g" data-go="feed" style="width:100%;margin-top:4px">See all requests</button></section>
-<section class="card c7" style="--i:4"><h3>Blood donated through <b>LifeDrop</b> · units per month</h3><div class="lg">${G.map((g, i) => `<button data-t="${i}" style="--c:${CL[i]}"><i></i>${g}</button>`).join('')}</div><div class="bars" id="bars">${bars()}</div></section>
+${chartHTML()}
 <section class="card c5 map" style="--i:5"><h3>Nearest donation hospitals</h3><div class="lmap" id="lmap"></div><div class="hl">${HS.map((h, i) => `<button data-h="${i}" class="${i ? '' : 'on'}">${esc(h.n.split(' ')[0])} · ${h.km} km</button>`).join('')}</div><div class="hi" id="hi">${mapInfo(0)}</div></section>
 <section class="card c4" style="--i:6"><h3>Who you can help</h3><small>You can donate to</small><div class="chips">${CAN[me.group].map(g => `<span class="${g === me.group ? 'me' : ''}">${g}</span>`).join('')}</div><small>You can receive from</small><div class="chips">${recv.map(g => `<span class="${g === me.group ? 'me' : ''}">${g}</span>`).join('')}</div></section>
 <section class="card c4" style="--i:7"><h3>Donor badges</h3><div class="bd">${[['First Drop', 1], ['Hero', 3], ['Lifesaver', 5], ['Legend', 10]].map(([t, k]) => `<div class="${n >= k ? '' : 'lock'}"><b>${k}</b>${t}</div>`).join('')}</div></section>
@@ -129,8 +144,8 @@
 
   /* ---------- engine ---------- */
   const count = (root, delay) => $$('[data-n]', root).forEach(el => {
-    const n = +el.dataset.n; let t0;
-    const f = t => { t0 = t0 || t; const k = Math.min((t - t0) / 1200, 1); el.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); };
+    let t0;
+    const f = t => { t0 = t0 || t; const k = Math.min((t - t0) / 1200, 1); el.textContent = Math.round(+el.dataset.n * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); };
     setTimeout(() => requestAnimationFrame(f), delay);
   });
   const side = on => { $('#side').classList.toggle('on', on); $('#scrim').classList.toggle('on', on); };
@@ -216,12 +231,13 @@
     if ((x = q('[data-chat]'))) return openChat(x.dataset.chat);
     if ((x = q('[data-go]'))) return go(x.dataset.go);
     if ((x = q('[data-s]'))) { ST.sort = x.dataset.s; W('ld_set', ST); $$('[data-s]').forEach(b => b.classList.toggle('on', b === x)); $('#fl').innerHTML = posts(); return; }
-    if ((x = q('[data-t]'))) { const i = +x.dataset.t; OFF.has(i) ? OFF.delete(i) : OFF.add(i); if (OFF.size === G.length) OFF.delete(i); x.classList.toggle('off', OFF.has(i)); $$('[data-t]').forEach(b => b.classList.toggle('off', OFF.has(+b.dataset.t))); $('#bars').innerHTML = bars(); return; }
+    if ((x = q('[data-m]'))) return setMonth(+x.dataset.m);
     if ((x = q('[data-h]'))) return pick(+x.dataset.h);
     if ((x = q('[data-c]'))) { act = x.dataset.c; return paintChat(true); }
     if (q('[data-bk]')) { act = null; return paintChat(); }
   });
   $('#view').addEventListener('change', e => {
+    if (e.target.id === 'mo') return setMonth(+e.target.value);
     const k = e.target.dataset.k; if (!k) return;
     if (k === 'avail') return setAvail(e.target.checked);
     ST[k] = e.target.checked; W('ld_set', ST);
