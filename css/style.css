@@ -124,6 +124,9 @@ h3 {
   z-index: 0;
   pointer-events: none;
   opacity: 0.7;
+  /* own compositor layer so it doesn't repaint/flicker while scrolling */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 main,
 footer {
@@ -152,6 +155,7 @@ header {
 }
 header.scrolled {
   background: rgba(255, 248, 248, 0.82);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   backdrop-filter: blur(16px) saturate(1.4);
   box-shadow: 0 8px 30px -14px rgba(20, 9, 12, 0.25);
   height: 64px;
@@ -373,6 +377,7 @@ header.scrolled {
 /*Hero*/
 .hero {
   min-height: 100vh;
+  min-height: 100svh; /* stable on mobile: doesn't jump when the URL bar hides */
   position: relative;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
@@ -391,6 +396,16 @@ header.scrolled {
   background: radial-gradient(circle, rgba(255, 77, 94, 0.28), transparent 65%);
   animation: glowDrift 12s ease-in-out infinite alternate;
   z-index: -1;
+  will-change: transform;
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  .hero-glow {
+    width: 420px;
+    height: 420px;
+    right: -140px;
+    top: -60px;
+  }
 }
 @keyframes glowDrift {
   to {
