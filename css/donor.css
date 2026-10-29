@@ -55,7 +55,7 @@ aside{position:fixed;inset:0 auto 0 0;width:256px;padding:22px 16px calc(22px + 
 .hero{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:2px 0 22px;animation:up .9s var(--e) both;animation-delay:var(--b,0s)}
 .hero h2{font-size:clamp(26px,4vw,40px);line-height:1.15}
 .eb{color:var(--rl);letter-spacing:.14em;text-transform:uppercase;font-size:12px;margin-bottom:6px}
-.gb{display:grid;place-items:center;flex:none;min-width:64px;height:64px;padding:0 8px;border-radius:20px;font-weight:700;font-size:22px;background:linear-gradient(135deg,var(--rl),#7a0010);box-shadow:0 0 30px rgba(225,29,52,.45);animation:beat 2.6s infinite}
+.gb{color:#fff;display:grid;place-items:center;flex:none;min-width:64px;height:64px;padding:0 8px;border-radius:20px;font-weight:700;font-size:22px;background:linear-gradient(135deg,var(--rl),#7a0010);box-shadow:0 0 30px rgba(225,29,52,.45);animation:beat 2.6s infinite}
 .gb.s{min-width:44px;height:44px;border-radius:14px;font-size:15px;box-shadow:0 0 16px rgba(225,29,52,.4);animation:none}
 .num{font:700 56px/1 'Playfair Display',serif;margin-bottom:10px}
 .bar2{height:8px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;margin:12px 0 8px}
