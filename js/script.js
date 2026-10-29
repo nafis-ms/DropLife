@@ -639,14 +639,29 @@
   const ctx = canvas.getContext("2d");
   let W,
     H,
-    cells = [];
+    cells = [],
+    lastW = 0,
+    maxH = 0,
+    resizeTimer;
+  // On phones the URL bar shows/hides while scrolling, which fires "resize"
+  // with a different innerHeight. Rebuilding the canvas every time cleared it
+  // and re-randomised every cell (visible flicker/jumps). Now the canvas is
+  // only rebuilt when the width changes (rotation) or the viewport grows taller.
   const resize = () => {
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    W = canvas.width = innerWidth * dpr;
-    H = canvas.height = innerHeight * dpr;
-    canvas.style.width = innerWidth + "px";
-    canvas.style.height = innerHeight + "px";
-    const count = innerWidth < 700 ? 14 : 28;
+    const w = innerWidth;
+    const widthChanged = w !== lastW;
+    if (widthChanged) maxH = 0;
+    const h = Math.max(maxH, innerHeight);
+    if (!widthChanged && h === maxH) return;
+    lastW = w;
+    maxH = h;
+    W = canvas.width = w * dpr;
+    H = canvas.height = h * dpr;
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    if (!widthChanged) return; // keep existing cells, just a taller canvas
+    const count = w < 700 ? 14 : 28;
     cells = Array.from({ length: count }, () => ({
       x: Math.random() * W,
       y: Math.random() * H,
@@ -688,7 +703,10 @@
     requestAnimationFrame(loop);
   }
   resize();
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 150);
+  });
   if (!reduceMotion) loop();
 
   /*  Footer year  */
