@@ -239,10 +239,10 @@
         detail: { ...profile, password: google ? undefined : $('#suPass', form).value }
       }));
 
-      /* Donors go straight to their dashboard. */
-      if (r === 'donor') {
-        try { localStorage.setItem('lifedrop-user', JSON.stringify({ name: (profile.firstName + ' ' + profile.lastName).trim() || profile.email, email: profile.email, role: 'donor' })); } catch (e) { /* storage unavailable */ }
-        location.href = 'donor.html';
+      /* Donors and receivers go straight to their own dashboard. */
+      if (r === 'donor' || r === 'receiver') {
+        try { localStorage.setItem('lifedrop-user', JSON.stringify({ name: (profile.firstName + ' ' + profile.lastName).trim() || profile.email, email: profile.email, role: r })); } catch (e) { /* storage unavailable */ }
+        location.href = r + '.html';
         return;
       }
 
