@@ -536,11 +536,22 @@
         } catch (_) {}
         return { name: "Demo Donor", email, role: "donor" };
       }
-      // A donor who signed up on this device goes back to their dashboard.
+      // Demo receiver account: receiver@demo.com / 12345678
+      if (email.toLowerCase() === "receiver@demo.com") {
+        if (password !== "12345678") throw new Error("Incorrect email or password.");
+        try {
+          localStorage.setItem("lifedrop_profile", JSON.stringify({
+            firstName: "Demo", lastName: "Receiver", email: "receiver@demo.com", role: "receiver", provider: "demo", since: 2025,
+            details: { suRPhone: "+880 1800 000000", suRCountry: "Bangladesh", needGroup: "B+" },
+          }));
+        } catch (_) {}
+        return { name: "Demo Receiver", email, role: "receiver" };
+      }
+      // A donor or receiver who signed up on this device goes back to their dashboard.
       let saved = null;
       try { saved = JSON.parse(localStorage.getItem("lifedrop_profile") || "null"); } catch (_) {}
-      if (saved && saved.role === "donor" && (saved.email || "").toLowerCase() === email.toLowerCase())
-        return { name: `${saved.firstName} ${saved.lastName}`.trim() || email.split("@")[0], email, role: "donor" };
+      if (saved && (saved.role === "donor" || saved.role === "receiver") && (saved.email || "").toLowerCase() === email.toLowerCase())
+        return { name: `${saved.firstName} ${saved.lastName}`.trim() || email.split("@")[0], email, role: saved.role };
       return { name: email.split("@")[0], email };
     },
     async signup({ name, email }) {
@@ -600,8 +611,8 @@
     try {
       localStorage.setItem("lifedrop-user", JSON.stringify(user));
     } catch (_) {}
-    if (user.role === "donor") {
-      location.href = "donor.html";
+    if (user.role === "donor" || user.role === "receiver") {
+      location.href = user.role + ".html";
       return;
     }
     paint();
