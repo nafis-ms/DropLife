@@ -239,8 +239,8 @@
         detail: { ...profile, password: google ? undefined : $('#suPass', form).value }
       }));
 
-      /* Donors and receivers go straight to their own dashboard. */
-      if (r === 'donor' || r === 'receiver') {
+      /* Every role goes straight to its own dashboard. */
+      if (r === 'donor' || r === 'receiver' || r === 'hospital') {
         try { localStorage.setItem('lifedrop-user', JSON.stringify({ name: (profile.firstName + ' ' + profile.lastName).trim() || profile.email, email: profile.email, role: r })); } catch (e) { /* storage unavailable */ }
         location.href = r + '.html';
         return;
