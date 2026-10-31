@@ -14,6 +14,7 @@
     return {
       name: D.suHName || ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || 'Your hospital',
       contact: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || 'Not added',
+      photo: P.photo || '',
       email: P.email || U.email || '',
       loc: D.suHLoc || 'Not added', hot: D.suHHot || 'Not added', lic: D.suHLic || 'Not provided',
       since: P.since || new Date().getFullYear()
@@ -349,14 +350,14 @@ ${gpick()}
   function openMod(html, label) { const m = $('#modal'); lastFocus = document.activeElement; m.innerHTML = html; m.firstElementChild.setAttribute('aria-label', label); m.classList.add('on'); m.setAttribute('aria-hidden', 'false'); setTimeout(() => { const f = $('.x', m); if (f) f.focus({ preventScroll: true }); }, 350); }
   function closeMod() { const m = $('#modal'); if (!m.classList.contains('on')) return; m.classList.remove('on'); m.setAttribute('aria-hidden', 'true'); if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); }
   function profile() {
-    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt"><span class="gb">${esc((me.name[0] || 'H').toUpperCase())}</span><div><h2>${esc(me.name)}</h2><small>Hospital · member since ${esc(me.since)}</small></div></div><div class="kv"><div class="w"><small>Hospital location</small>${esc(me.loc)}</div><div><small>Hotline</small>${esc(me.hot)}</div><div><small>Registration number</small>${esc(me.lic)}</div><div><small>Contact person</small>${esc(me.contact)}</div><div><small>Email</small>${esc(me.email)}</div><div><small>Blood units in stock</small>${num(STOCK.reduce((a, v) => a + v, 0))}</div><div><small>Types running low</small>${STOCK.filter(v => v < 10).length}</div><div><small>Donors confirmed</small>${CD.length}</div><div><small>Receivers confirmed</small>${CR.length}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo hospital' : 'Hospital'}</div></div></div>`, 'Hospital profile');
+    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt">${LifeDropAccount.badge(me.photo, esc((me.name[0] || 'H').toUpperCase()))}<div><h2>${esc(me.name)}</h2><small>Hospital · member since ${esc(me.since)}</small></div></div><div class="kv"><div class="w"><small>Hospital location</small>${esc(me.loc)}</div><div><small>Hotline</small>${esc(me.hot)}</div><div><small>Registration number</small>${esc(me.lic)}</div><div><small>Contact person</small>${esc(me.contact)}</div><div><small>Email</small>${esc(me.email)}</div><div><small>Blood units in stock</small>${num(STOCK.reduce((a, v) => a + v, 0))}</div><div><small>Types running low</small>${STOCK.filter(v => v < 10).length}</div><div><small>Donors confirmed</small>${CD.length}</div><div><small>Receivers confirmed</small>${CR.length}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo hospital' : 'Hospital'}</div></div></div>`, 'Hospital profile');
   }
 
   /* ---------- events ---------- */
   $('#nav').innerHTML = NAV.map(([k, t]) => `<button type="button" data-v="${k}">${ic(IC[k])}<span>${t}</span></button>`).join('');
   $('#tabs').innerHTML = [['dash', 'Home'], ['bank', 'Blood bank'], ['feed', 'Feed'], ['msgs', 'Messages'], ['menu', 'Menu']].map(([k, t]) => `<button type="button" data-v="${k}">${ic(IC[k])}<span>${t}</span></button>`).join('');
   $('#logout').innerHTML = ic(IC.out) + '<span>Log out</span>';
-  $('#av').textContent = (me.name[0] || 'H').toUpperCase();
+  LifeDropAccount.paint($('#av'), P, (me.name[0] || 'H').toUpperCase());
   document.body.classList.toggle('calm', !!ST.calm);
   const theme = () => { document.documentElement.classList.toggle('light', !!ST.light); const m = $('meta[name=theme-color]'); if (m) m.content = ST.light ? '#fff8f8' : '#0b0508'; };
   theme();
