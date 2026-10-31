@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff8f8">
+<title>LifeDrop · Hospital Dashboard</title>
+<script>try{var s=JSON.parse(localStorage.getItem("ldh_set"));if(!s||s.light!==false)document.documentElement.classList.add("light")}catch(e){document.documentElement.classList.add("light")}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<!-- donor.css = shared dashboard shell. receiver.css = shared widgets (forms, map, stock bars, tab bar). hospital.css = hospital-only styles. -->
+<link rel="stylesheet" href="css/donor.css">
+<link rel="stylesheet" href="css/receiver.css">
+<link rel="stylesheet" href="css/hospital.css">
+</head>
+<body>
+<div class="aurora"></div>
+<div class="curtain" aria-hidden="true"><i></i><i></i>
+  <div class="cm"><svg viewBox="0 0 100 130"><path d="M50 4C50 4 8 56 8 84a42 42 0 0 0 84 0C92 56 50 4 50 4Z"/></svg><p>Life<em>Drop</em></p></div>
+</div>
+<div class="app">
+  <aside id="side">
+    <a class="br" href="index.html"><svg viewBox="0 0 100 130"><path d="M50 4C50 4 8 56 8 84a42 42 0 0 0 84 0C92 56 50 4 50 4Z"/></svg>Life<em>Drop</em></a>
+    <nav id="nav" aria-label="Hospital navigation"></nav>
+    <button id="logout" type="button"></button>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="main">
+    <header class="top">
+      <button id="burger" type="button" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <h1 id="ttl"></h1>
+      <button class="av" id="av" type="button" aria-label="Open profile"></button>
+    </header>
+    <main id="view"></main>
+  </div>
+</div>
+<nav class="tabs" id="tabs" aria-label="Quick navigation"></nav>
+<div class="mod" id="modal" aria-hidden="true"></div>
+<div id="ok" role="status" aria-hidden="true">
+  <div class="okb"><i class="rp"></i><i class="rp r2"></i>
+    <svg viewBox="0 0 100 130"><path d="M50 4C50 4 8 56 8 84a42 42 0 0 0 84 0C92 56 50 4 50 4Z"/></svg>
+    <h2 id="okT">Saved</h2><p id="okP"></p>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="js/hospital.js"></script>
+</body>
+</html>
