@@ -16,11 +16,15 @@
     { d: '2025-10-03', h: 'United Hospital', u: 1 }, { d: '2025-05-21', h: 'BSMMU Blood Bank', u: 1 },
     { d: '2025-01-12', h: 'Evercare Hospital', u: 1 }, { d: '2024-09-02', h: 'Labaid Specialized Hospital', u: 1 }
   ] : (P.history || []);
-  const me = {
-    first: P.firstName || U.name || 'Donor', name: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || U.name || 'Donor',
-    email: P.email || U.email || '', group: D.donorGroup || 'O+', phone: D.suDPhone || 'Not added',
-    addr: [D.suDStreet, D.suDDistrict, D.suDCity, D.suDCountry].filter(Boolean).join(', ') || 'Not added', since: P.since || new Date().getFullYear()
+  const mkMe = (P, U) => {
+    const D = P.details || {};
+    return {
+      first: P.firstName || U.name || 'Donor', name: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || U.name || 'Donor',
+      email: P.email || U.email || '', group: D.donorGroup || 'O+', phone: D.suDPhone || 'Not added',
+      addr: [D.suDStreet, D.suDDistrict, D.suDCity, D.suDCountry].filter(Boolean).join(', ') || 'Not added', since: P.since || new Date().getFullYear()
+    };
   };
+  const me = mkMe(P, U);
   const H = 36e5, now = Date.now();
   const FEED = [
     { id: 1, n: 'Tasnim Rahman', g: 'O+', u: 2, h: 'Square Hospitals', km: 2.4, due: 2, ago: 12, urg: 2, x: 'Post-surgery patient needs blood urgently.' },
@@ -138,7 +142,7 @@ ${chartHTML()}
 
   const TG = [['avail', 'Available to donate', 'Show me to hospitals and patients nearby.'], ['alerts', 'Urgent request alerts', 'Notify me when a matching blood request is posted.'],
     ['loc', 'Share approximate location', 'Used to sort requests and hospitals by distance.'], ['dark', 'Dark Mode', 'Switch to the dark cinematic look.'], ['calm', 'Reduce motion', 'Tone down animations and effects.']];
-  const set = () => `<section class="card" style="--i:0;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
+  const set = () => `<div id="acct"></div><section class="card" style="--i:2;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
 
   const V = { dash, feed, msgs, hist, set };
 
@@ -178,6 +182,7 @@ ${chartHTML()}
     el.classList.remove('in');
     el.style.setProperty('--b', first ? '1.5s' : '0s');
     el.innerHTML = V[v]();
+    if (v === 'set') LifeDropAccount.mount($('#acct'), { role: 'donor', toast, onSaved: (p, u) => { Object.assign(me, mkMe(p, u)); $('#av').textContent = (me.first[0] || 'D').toUpperCase(); } });
     count(el, first ? 1500 : 150);
     if (v === 'dash') initMap();
     first = false;
@@ -248,7 +253,9 @@ ${chartHTML()}
   });
   $('#view').addEventListener('submit', e => {
     e.preventDefault();
-    const i = $('#ci'), x = i.value.trim(), id = act;
+    const i = $('#ci');
+    if (!i || !e.target.contains(i)) return; /* not the chat form (e.g. account settings) */
+    const x = i.value.trim(), id = act;
     if (!x || !id) return;
     CV[id].m.push({ me: 1, x }); save(); paintChat(true);
     setTimeout(() => { if (act === id && cur === 'msgs' && $('#ms')) { $('#ms').insertAdjacentHTML('beforeend', '<div class="m ty" id="ty"><i></i><i></i><i></i></div>'); $('#ms').scrollTop = 1e9; } }, 500);
