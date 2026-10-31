@@ -20,7 +20,7 @@
     const D = P.details || {};
     return {
       first: P.firstName || U.name || 'Donor', name: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || U.name || 'Donor',
-      email: P.email || U.email || '', group: D.donorGroup || 'O+', phone: D.suDPhone || 'Not added',
+      photo: P.photo || '', email: P.email || U.email || '', group: D.donorGroup || 'O+', phone: D.suDPhone || 'Not added',
       addr: [D.suDStreet, D.suDDistrict, D.suDCity, D.suDCountry].filter(Boolean).join(', ') || 'Not added', since: P.since || new Date().getFullYear()
     };
   };
@@ -199,7 +199,7 @@ ${chartHTML()}
   }
   function profile() {
     const e = elig(), n = HIST.length, m = $('#modal');
-    m.innerHTML = `<div class="card pc" role="dialog" aria-modal="true" aria-label="Donor profile"><button class="x" data-x aria-label="Close">&times;</button><div class="pt"><span class="gb">${me.group}</span><div><h2>${esc(me.name)}</h2><small>Donor · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Blood group</small>${me.group}</div><div><small>Status</small>${ST.avail ? 'Available to donate' : 'Not available'}</div><div><small>Total donations</small>${n}</div><div><small>Last donation</small>${esc(e.last)}</div><div class="w"><small>Address</small>${esc(me.addr)}</div><div class="w"><small>Eligibility</small>${e.ok ? 'Fit to donate now' : 'Eligible again on ' + e.next}</div></div></div>`;
+    m.innerHTML = `<div class="card pc" role="dialog" aria-modal="true" aria-label="Donor profile"><button class="x" data-x aria-label="Close">&times;</button><div class="pt">${LifeDropAccount.badge(me.photo, me.group)}<div><h2>${esc(me.name)}</h2><small>Donor · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Blood group</small>${me.group}</div><div><small>Status</small>${ST.avail ? 'Available to donate' : 'Not available'}</div><div><small>Total donations</small>${n}</div><div><small>Last donation</small>${esc(e.last)}</div><div class="w"><small>Address</small>${esc(me.addr)}</div><div class="w"><small>Eligibility</small>${e.ok ? 'Fit to donate now' : 'Eligible again on ' + e.next}</div></div></div>`;
     m.classList.add('on'); m.setAttribute('aria-hidden', 'false');
   }
   const closeProf = () => { const m = $('#modal'); m.classList.remove('on'); m.setAttribute('aria-hidden', 'true'); };
@@ -207,7 +207,7 @@ ${chartHTML()}
   /* ---------- events ---------- */
   $('#nav').innerHTML = NAV.map(([k, t, p]) => `<button type="button" data-v="${k}">${ic(p)}<span>${t}</span></button>`).join('');
   $('#logout').innerHTML = ic('<path d="M9 4H4v16h5M16 8l4 4-4 4M20 12H9"/>') + '<span>Log out</span>';
-  $('#av').textContent = (me.first[0] || 'D').toUpperCase();
+  LifeDropAccount.paint($('#av'), P, (me.first[0] || 'D').toUpperCase());
   document.body.classList.toggle('calm', !!ST.calm);
   const theme = () => { document.documentElement.classList.toggle('light', !!ST.light); const m = $('meta[name=theme-color]'); if (m) m.content = ST.light ? '#fff8f8' : '#0b0508'; };
   theme();
