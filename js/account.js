@@ -19,6 +19,32 @@
   /* f = [key, label, source ('p' = profile, 'd' = profile.details), options]  */
   const NAME = [['firstName', 'First name', 'p', { req: 1, ac: 'given-name' }], ['lastName', 'Last name', 'p', { ac: 'family-name' }]];
   const EM = ['email', 'Email address', 'p', { req: 1, type: 'email', ac: 'email' }];
+  /* ---- profile photo ---- */
+  const MAX_BYTES = 8 * 1024 * 1024, SIZE = 256;
+  const letterOf = (P, role) => String((role === 'hospital' ? (P.details || {}).suHName : '') || P.firstName || P.email || '?').trim()[0].toUpperCase();
+  /* Shows the photo in a round avatar element, or its initial when there is none. */
+  function paint(el, P, letter) {
+    if (!el) return;
+    if (P && P.photo) { el.classList.add('ph'); el.style.backgroundImage = `url("${P.photo}")`; el.textContent = ''; }
+    else { el.classList.remove('ph'); el.style.backgroundImage = ''; el.textContent = letter; }
+  }
+  /* HTML for a .gb badge (profile card): the photo, or the given text. `text` must already be escaped. */
+  const badge = (photo, text) => photo ? `<span class="gb ph" style="background-image:url('${photo}')" role="img" aria-label="Profile photo"></span>` : `<span class="gb">${text}</span>`;
+  /* Centre-crops to a square and shrinks, so the stored image stays small. */
+  const toAvatar = file => new Promise((res, rej) => {
+    if (!file || !/^image\/(jpeg|png|webp|gif)$/.test(file.type)) return rej(new Error('Choose a JPG, PNG, WebP or GIF image.'));
+    if (file.size > MAX_BYTES) return rej(new Error('That image is over 8 MB. Choose a smaller one.'));
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const n = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas'); c.width = c.height = SIZE;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, SIZE, SIZE);
+      x.drawImage(img, (img.naturalWidth - n) / 2, (img.naturalHeight - n) / 2, n, n, 0, 0, SIZE, SIZE);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.86));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('That file could not be read as an image.')); };
+    img.src = url;
+  });
+
   const SPEC = {
     donor: {
       title: 'Your details',
@@ -53,16 +79,19 @@
     root.classList.add('acct');
     if ($('#tabs')) root.classList.add('has-tabs');
 
+    let pend; /* undefined = photo unchanged, '' = removed, otherwise a new data URL */
+    const photoNow = () => pend === undefined ? (J('lifedrop_profile') || P).photo || '' : pend;
     const snap = f => JSON.stringify(read(f));
     function read(f) {
       const o = {}; fields.forEach(([k]) => { o[k] = f.elements[k].value.trim(); });
       if (spec.group) o[spec.group.key] = (($(`[name=${spec.group.key}]:checked`, f)) || {}).value || '';
       return o;
     }
-    const render = () => {
+    const render = still => {
+      pend = undefined; root.classList.toggle('still', !!still); /* no entrance animation when re-rendering after Save or Discard */
       const P2 = J('lifedrop_profile') || P;
       root.innerHTML = `<section class="card acc-card" style="--i:0"><div class="hd"><h3>${esc(spec.title)}</h3><span class="st" id="acs">All changes saved</span></div>
-<form id="acf" novalidate>${spec.rows.map(r => rowHTML(P2, r)).join('')}${spec.address ? `<fieldset class="adr"><legend>Current address</legend>${spec.address.map(r => rowHTML(P2, r)).join('')}</fieldset>` : ''}${spec.group ? groupHTML(P2, spec.group) : ''}
+<form id="acf" novalidate><div class="phr"><span class="pho${P2.photo ? ' ph' : ''}" id="acph"${P2.photo ? ` style="background-image:url('${P2.photo}')"` : ''}>${P2.photo ? '' : esc(letterOf(P2, role))}</span><div><div class="phb"><button type="button" class="btn g" id="acpu">Upload photo</button><button type="button" class="btn g" id="acpr"${P2.photo ? '' : ' disabled'}>Remove</button><input type="file" id="ac-photo" class="vh" accept="image/png,image/jpeg,image/webp,image/gif" tabindex="-1" aria-label="Choose a profile photo"></div><small class="mut">JPG, PNG or WebP. Square photos look best.</small><small class="fe" id="acpe" role="alert"></small></div></div>${spec.rows.map(r => rowHTML(P2, r)).join('')}${spec.address ? `<fieldset class="adr"><legend>Current address</legend>${spec.address.map(r => rowHTML(P2, r)).join('')}</fieldset>` : ''}${spec.group ? groupHTML(P2, spec.group) : ''}
 <div class="bar"><button type="button" class="btn g" id="acd" disabled>Discard</button><button type="submit" class="btn" id="acb" disabled>Save changes</button></div></form></section>
 ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div class="hd"><h3>Password</h3></div><p class="mut">You signed in with Google, so there is no LifeDrop password to change.</p></section>` : `<section class="card acc-card" style="--i:1"><div class="hd"><h3>Change password</h3></div>
 <form id="acp" novalidate autocomplete="off">${pwField('pw0', 'Current password', 'current-password')}${pwField('pw1', 'New password', 'new-password')}${pwField('pw2', 'Confirm new password', 'new-password')}<small class="mut">Use at least 8 characters.</small>
@@ -71,7 +100,7 @@ ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div 
     };
     render();
 
-    const dirty = f => { const d = snap(f) !== f._snap; $('#acb', root).disabled = !d; $('#acd', root).disabled = !d; const s = $('#acs', root); s.textContent = d ? 'Unsaved changes' : 'All changes saved'; s.classList.toggle('dirty', d); return d; };
+    const dirty = f => { const d = snap(f) !== f._snap || pend !== undefined; $('#acb', root).disabled = !d; $('#acd', root).disabled = !d; const s = $('#acs', root); s.textContent = d ? 'Unsaved changes' : 'All changes saved'; s.classList.toggle('dirty', d); return d; };
     const err = (f, k, msg) => { const box = k === 'group' ? $('[data-k=group]', f) : f.elements[k].closest('.fld'); box.classList.toggle('bad', !!msg); $('.fe', box).textContent = msg || ''; return msg ? (k === 'group' ? $('input', box) : f.elements[k]) : null; };
 
     root.addEventListener('input', e => {
@@ -79,10 +108,24 @@ ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div 
       const box = e.target.closest('.fld'); if (box) { box.classList.remove('bad'); const fe = $('.fe', box); if (fe) fe.textContent = ''; }
       if (f.id === 'acf') dirty(f);
     });
-    root.addEventListener('change', e => { const f = e.target.closest('#acf'); if (f) dirty(f); });
+    const showPhoto = () => {
+      const el = $('#acph', root), p = photoNow(), P2 = J('lifedrop_profile') || P;
+      el.classList.toggle('ph', !!p); el.style.backgroundImage = p ? `url('${p}')` : ''; el.textContent = p ? '' : letterOf({ ...P2, firstName: $('#ac-firstName', root).value || P2.firstName, details: { ...(P2.details || {}), suHName: ($('#ac-suHName', root) || {}).value || (P2.details || {}).suHName } }, role);
+      $('#acpr', root).disabled = !p;
+    };
+    root.addEventListener('change', async e => {
+      const f = e.target.closest('#acf');
+      if (e.target.id === 'ac-photo') {
+        const file = e.target.files[0], er = $('#acpe', root); e.target.value = ''; if (!file) return;
+        try { pend = await toAvatar(file); er.textContent = ''; showPhoto(); } catch (x) { er.textContent = x.message; }
+      }
+      if (f) dirty(f);
+    });
     root.addEventListener('click', e => {
       const t = e.target.closest('button'); if (!t) return;
-      if (t.id === 'acd') { render(); return; }
+      if (t.id === 'acd') { render(true); return; }
+      if (t.id === 'acpu') { $('#ac-photo', root).click(); return; }
+      if (t.id === 'acpr') { pend = ''; $('#acpe', root).textContent = ''; showPhoto(); dirty($('#acf', root)); return; }
       if (t.dataset.pw) { const i = $('#' + t.dataset.pw, root), show = i.type === 'password'; i.type = show ? 'text' : 'password'; t.textContent = show ? 'Hide' : 'Show'; }
     });
 
@@ -109,6 +152,7 @@ ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div 
       fields.forEach(([k, , src]) => { if (src === 'd') { if (v[k]) details[k] = v[k]; else delete details[k]; } });
       if (spec.group) { if (v[spec.group.key]) details[spec.group.key] = v[spec.group.key]; else delete details[spec.group.key]; }
       const P2 = { ...old, firstName: v.firstName, lastName: v.lastName || '', email: v.email, details };
+      if (pend === '') delete P2.photo; else if (pend) P2.photo = pend;
       const U2 = { ...oldU, name: (v.firstName + ' ' + (v.lastName || '')).trim() || v.email, email: v.email };
 
       /* Data that dashboards keep per email (ldr_*, ldh_*) moves with the account, so nothing is orphaned. */
@@ -119,10 +163,11 @@ ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div 
           moves.forEach(k => { const nk = k.slice(0, k.length - prevEmail.length) + newEmail; if (localStorage.getItem(nk) === null) { localStorage.setItem(nk, localStorage.getItem(k)); localStorage.removeItem(k); } });
         } catch (x) { /* storage unavailable */ }
       }
-      if (!W('lifedrop_profile', P2) || !W('lifedrop-user', U2)) { toast('Could not save. Browser storage is unavailable.'); return; }
+      if (!W('lifedrop_profile', P2) || !W('lifedrop-user', U2)) { toast('Could not save. Browser storage is full or unavailable.'); return; }
       document.dispatchEvent(new CustomEvent('lifedrop:account-update', { detail: { previousEmail: prevEmail, ...P2 } }));
       if (ctx.onSaved) ctx.onSaved(P2, U2);
-      render(); toast('Your details were saved');
+      paint($('#av'), P2, letterOf(P2, role));
+      render(true); toast('Your details were saved');
     }
 
     function savePassword(f) {
@@ -140,5 +185,5 @@ ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div 
     }
   }
 
-  window.LifeDropAccount = { mount };
+  window.LifeDropAccount = { mount, paint, badge, letterOf };
 })();
