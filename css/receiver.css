@@ -34,6 +34,8 @@ button:disabled{cursor:not-allowed}
 .btn.g.d{color:#ff7a88}
 html.light .btn.g.d{color:#c4001d}
 html.light .btn.g.d:hover{border-color:#c4001d}
+/* donor.css light-mode '.m' rule outranks '.m.me', which left sent bubbles pale with white text */
+html.light .m.me{background:linear-gradient(135deg,var(--rl),var(--r));color:#fff}
 button.row{width:100%;text-align:left}
 .rtx{display:block;min-width:0}
 .rtx b{display:block;line-height:1.3}
