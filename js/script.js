@@ -547,10 +547,21 @@
         } catch (_) {}
         return { name: "Demo Receiver", email, role: "receiver" };
       }
-      // A donor or receiver who signed up on this device goes back to their dashboard.
+      // Demo hospital account: hospital@demo.com / 12345678
+      if (email.toLowerCase() === "hospital@demo.com") {
+        if (password !== "12345678") throw new Error("Incorrect email or password.");
+        try {
+          localStorage.setItem("lifedrop_profile", JSON.stringify({
+            firstName: "Demo", lastName: "Hospital", email: "hospital@demo.com", role: "hospital", provider: "demo", since: 2023,
+            details: { suHName: "LifeDrop Demo General Hospital", suHLoc: "12 Mirpur Road, Dhanmondi, Dhaka 1205", suHHot: "+880 1900 000000", suHLic: "BD-HOSP-2023-04821" },
+          }));
+        } catch (_) {}
+        return { name: "Demo Hospital", email, role: "hospital" };
+      }
+      // A donor, receiver or hospital who signed up on this device goes back to their dashboard.
       let saved = null;
       try { saved = JSON.parse(localStorage.getItem("lifedrop_profile") || "null"); } catch (_) {}
-      if (saved && (saved.role === "donor" || saved.role === "receiver") && (saved.email || "").toLowerCase() === email.toLowerCase())
+      if (saved && ["donor", "receiver", "hospital"].includes(saved.role) && (saved.email || "").toLowerCase() === email.toLowerCase())
         return { name: `${saved.firstName} ${saved.lastName}`.trim() || email.split("@")[0], email, role: saved.role };
       return { name: email.split("@")[0], email };
     },
@@ -611,7 +622,7 @@
     try {
       localStorage.setItem("lifedrop-user", JSON.stringify(user));
     } catch (_) {}
-    if (user.role === "donor" || user.role === "receiver") {
+    if (["donor", "receiver", "hospital"].includes(user.role)) {
       location.href = user.role + ".html";
       return;
     }
@@ -624,6 +635,11 @@
 
   accountBtns.forEach((b) =>
     b.addEventListener("click", () => {
+      // Signed-in donors, receivers and hospitals go straight to their dashboard.
+      if (session && ["donor", "receiver", "hospital"].includes(session.role)) {
+        location.href = session.role + ".html";
+        return;
+      }
       if (b.id === "mmAccount") {
         toggleMenu(false);
         setTimeout(() => setAuthModal(true), reduceMotion ? 0 : 450);
