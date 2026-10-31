@@ -9,14 +9,17 @@
   const P = J('lifedrop_profile'), U = J('lifedrop-user');
   if (!P || P.role !== 'hospital' || !U) { location.replace('index.html'); return; }
 
-  const D = P.details || {};
-  const me = {
-    name: D.suHName || ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || 'Your hospital',
-    contact: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || 'Not added',
-    email: P.email || U.email || '',
-    loc: D.suHLoc || 'Not added', hot: D.suHHot || 'Not added', lic: D.suHLic || 'Not provided',
-    since: P.since || new Date().getFullYear()
+  const mkMe = (P, U) => {
+    const D = P.details || {};
+    return {
+      name: D.suHName || ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || 'Your hospital',
+      contact: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || 'Not added',
+      email: P.email || U.email || '',
+      loc: D.suHLoc || 'Not added', hot: D.suHHot || 'Not added', lic: D.suHLic || 'Not provided',
+      since: P.since || new Date().getFullYear()
+    };
   };
+  const me = mkMe(P, U);
   /* Storage is per account on this device (stands in for your database). */
   const K = k => 'ldh_' + k + '_' + (me.email || 'guest').toLowerCase();
 
@@ -306,7 +309,7 @@ ${gpick()}
 
   /* ---------- settings ---------- */
   const TG = [['dark', 'Dark mode', 'Switch to the dark cinematic look.'], ['calm', 'Reduce motion', 'Tone down animations and effects.'], ['lowAlert', 'Low stock alerts', 'Show a banner on the dashboard when a blood type drops under 10 units.'], ['msgAlert', 'Message alerts', 'Show a notice when a donor or receiver replies.']];
-  const set = () => `<section class="card" style="--i:0;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
+  const set = () => `<div id="acct"></div><section class="card" style="--i:2;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
 
   const V = { dash, bank, feed, msgs, conf, hist, set };
 
@@ -328,6 +331,7 @@ ${gpick()}
     document.body.classList.remove('inchat');
     const el = $('#view'); el.classList.remove('in'); el.style.setProperty('--b', first ? '1.5s' : '0s');
     el.innerHTML = V[v]();
+    if (v === 'set') LifeDropAccount.mount($('#acct'), { role: 'hospital', toast, onSaved: (p, u) => { Object.assign(me, mkMe(p, u)); $('#av').textContent = (me.name[0] || 'H').toUpperCase(); } });
     count(el, first ? 1500 : 150);
     if (v === 'dash') initMap();
     if (v === 'feed') paintFeed();
