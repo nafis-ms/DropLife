@@ -9,16 +9,20 @@
   const P = J('lifedrop_profile'), U = J('lifedrop-user');
   if (!P || P.role !== 'receiver' || !U) { location.replace('index.html'); return; }
 
-  const D = P.details || {};
-  const me = {
-    first: P.firstName || (U.name || '').split(' ')[0] || 'there',
-    name: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || U.name || 'Receiver',
-    email: P.email || U.email || '',
-    phone: D.suRPhone || 'Not added',
-    country: D.suRCountry || 'Not added',
-    group: D.needGroup || '',
-    since: P.since || new Date().getFullYear()
+  const mkMe = (P, U) => {
+    const D = P.details || {};
+    return {
+      first: P.firstName || (U.name || '').split(' ')[0] || 'there',
+      name: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || U.name || 'Receiver',
+      email: P.email || U.email || '',
+      phone: D.suRPhone || 'Not added',
+      country: D.suRCountry || 'Not added',
+      address: D.suRAddress || '',
+      group: D.needGroup || '',
+      since: P.since || new Date().getFullYear()
+    };
   };
+  const me = mkMe(P, U);
   /* Storage is per account, so two people on one device never see each other's requests. */
   const K = k => 'ldr_' + k + '_' + (me.email || 'guest').toLowerCase();
 
@@ -312,7 +316,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
   /* ---------- settings ---------- */
   const TG = [['donors', 'Show donors on the map', 'Turn off to see only hospitals and your location.'], ['alerts', 'Donor reply alerts', 'Show a notice when a donor replies to you.'],
     ['dark', 'Dark mode', 'Switch to the dark cinematic look.'], ['calm', 'Reduce motion', 'Tone down animations and effects.']];
-  const set = () => `<section class="card" style="--i:0;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
+  const set = () => `<div id="acct"></div><section class="card" style="--i:2;max-width:720px">${TG.map(([k, t, d]) => `<label class="set sw"><div><b style="color:var(--t)">${t}</b><small>${d}</small></div><input type="checkbox" data-k="${k}" ${(k === 'dark' ? !ST.light : ST[k]) ? 'checked' : ''}><i></i></label>`).join('')}</section>`;
 
   const V = { dash, neu, mine, msgs, hist, set };
 
@@ -337,6 +341,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
     el.classList.remove('in');
     el.style.setProperty('--b', first ? '1.5s' : '0s');
     el.innerHTML = V[v]();
+    if (v === 'set') LifeDropAccount.mount($('#acct'), { role: 'receiver', toast, onSaved: (p, u) => { Object.assign(me, mkMe(p, u)); $('#av').textContent = (me.first[0] || 'R').toUpperCase(); } });
     count(el, first ? 1500 : 150);
     if (v === 'dash') { initMap(); paintStock(SH, true); }
     first = false;
@@ -360,7 +365,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
   }
   function profile() {
     const ful = HIST.filter(h => h.status === 'fulfilled').length;
-    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt"><span class="gb">${esc((me.first[0] || 'R').toUpperCase())}</span><div><h2>${esc(me.name)}</h2><small>Receiver · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Country</small>${esc(me.country)}</div><div><small>Blood group needed</small>${esc(me.group || 'Not set')}</div><div><small>Active requests</small>${REQ.length}</div><div><small>Total requests</small>${REQ.length + HIST.length}</div><div><small>Fulfilled</small>${ful}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo account' : 'Receiver'}</div><div class="w"><small>Map location</small>Dhanmondi, Dhaka (demo area)</div></div></div>`, 'Receiver profile');
+    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt"><span class="gb">${esc((me.first[0] || 'R').toUpperCase())}</span><div><h2>${esc(me.name)}</h2><small>Receiver · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Country</small>${esc(me.country)}</div><div><small>Address</small>${esc(me.address || 'Not added')}</div><div><small>Blood group needed</small>${esc(me.group || 'Not set')}</div><div><small>Active requests</small>${REQ.length}</div><div><small>Total requests</small>${REQ.length + HIST.length}</div><div><small>Fulfilled</small>${ful}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo account' : 'Receiver'}</div><div class="w"><small>Map location</small>Dhanmondi, Dhaka (demo area)</div></div></div>`, 'Receiver profile');
   }
   function editReq(id) {
     const r = REQ.find(x => x.id === id); if (!r) return;
