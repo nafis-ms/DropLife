@@ -14,6 +14,7 @@
     return {
       first: P.firstName || (U.name || '').split(' ')[0] || 'there',
       name: ((P.firstName || '') + ' ' + (P.lastName || '')).trim() || U.name || 'Receiver',
+      photo: P.photo || '',
       email: P.email || U.email || '',
       phone: D.suRPhone || 'Not added',
       country: D.suRCountry || 'Not added',
@@ -365,7 +366,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
   }
   function profile() {
     const ful = HIST.filter(h => h.status === 'fulfilled').length;
-    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt"><span class="gb">${esc((me.first[0] || 'R').toUpperCase())}</span><div><h2>${esc(me.name)}</h2><small>Receiver · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Country</small>${esc(me.country)}</div><div><small>Address</small>${esc(me.address || 'Not added')}</div><div><small>Blood group needed</small>${esc(me.group || 'Not set')}</div><div><small>Active requests</small>${REQ.length}</div><div><small>Total requests</small>${REQ.length + HIST.length}</div><div><small>Fulfilled</small>${ful}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo account' : 'Receiver'}</div><div class="w"><small>Map location</small>Dhanmondi, Dhaka (demo area)</div></div></div>`, 'Receiver profile');
+    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt">${LifeDropAccount.badge(me.photo, esc((me.first[0] || 'R').toUpperCase()))}<div><h2>${esc(me.name)}</h2><small>Receiver · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Country</small>${esc(me.country)}</div><div><small>Address</small>${esc(me.address || 'Not added')}</div><div><small>Blood group needed</small>${esc(me.group || 'Not set')}</div><div><small>Active requests</small>${REQ.length}</div><div><small>Total requests</small>${REQ.length + HIST.length}</div><div><small>Fulfilled</small>${ful}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo account' : 'Receiver'}</div><div class="w"><small>Map location</small>Dhanmondi, Dhaka (demo area)</div></div></div>`, 'Receiver profile');
   }
   function editReq(id) {
     const r = REQ.find(x => x.id === id); if (!r) return;
@@ -385,7 +386,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
   $('#nav').innerHTML = NAV.map(([k, t]) => `<button type="button" data-v="${k}">${ic(IC[k])}<span>${t}</span></button>`).join('');
   $('#tabs').innerHTML = [['dash', 'Home'], ['mine', 'Requests'], ['neu', 'New', 1], ['msgs', 'Messages'], ['menu', 'Menu']].map(([k, t, c]) => `<button type="button" data-v="${k}" class="${c ? 'cta' : ''}" ${c ? 'aria-label="New request"' : ''}>${c ? `<span class="ico">${ic(IC.neu)}</span>` : ic(IC[k])}<span>${t}</span></button>`).join('');
   $('#logout').innerHTML = ic(IC.out) + '<span>Log out</span>';
-  $('#av').textContent = (me.first[0] || 'R').toUpperCase();
+  LifeDropAccount.paint($('#av'), P, (me.first[0] || 'R').toUpperCase());
   document.body.classList.toggle('calm', !!ST.calm);
   const theme = () => { document.documentElement.classList.toggle('light', !!ST.light); const m = $('meta[name=theme-color]'); if (m) m.content = ST.light ? '#fff8f8' : '#0b0508'; };
   theme();
