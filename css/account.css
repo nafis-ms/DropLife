@@ -1,0 +1,56 @@
+/* Account settings (js/account.js). Fully scoped to .acct so it is safe on every dashboard.
+   Uses the theme tokens from donor.css and its own border colours (donor.js reuses --b as an animation delay). */
+
+.acct{--ab:rgba(255,255,255,.1);--af:rgba(255,255,255,.22);display:grid;gap:18px;max-width:720px;margin-bottom:18px}
+html.light .acct{--ab:rgba(20,9,12,.1);--af:rgba(20,9,12,.24)}
+.acct .acc-card{border:1px solid var(--ab);overflow:visible;overflow:clip} /* clip (not hidden) so the save bar can stick */
+html.light .acct .acc-card{border-color:var(--ab)}
+.acct .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.acct .hd h3{margin:0;font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--t)}
+.acct .st{font-size:12.5px;color:var(--m);transition:color .3s}
+.acct .st.dirty{color:var(--rl);font-weight:600}
+html.light .acct .st.dirty{color:var(--r)}
+.acct .mut{color:var(--m);font-size:13.5px}
+
+.acct .f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.acct .fld{margin:0 0 16px;border:0;padding:0;min-width:0}
+.acct .fld>label,.acct .fld>legend{display:block;margin-bottom:6px;padding:0;font-size:13px;font-weight:500;color:var(--m)}
+.acct .adr{border:1px solid var(--ab);border-radius:16px;padding:16px 16px 0;margin:0 0 16px;min-width:0}
+.acct .adr legend{padding:0 8px;font-size:13px;font-weight:500;color:var(--m)}
+.acct input:not([type=radio]){width:100%;font:inherit;font-size:16px;color:var(--t);background:rgba(255,255,255,.06);border:1px solid var(--af);border-radius:12px;padding:12px 14px;outline:0;transition:.3s var(--e)}
+html.light .acct input:not([type=radio]){background:#fff}
+.acct input:not([type=radio]):focus{border-color:var(--rl);box-shadow:0 0 0 3px rgba(225,29,52,.18)}
+.acct .fld.bad input:not([type=radio]){border-color:#e11d34;box-shadow:0 0 0 3px rgba(225,29,52,.14)}
+.acct .fe{display:block;color:#ff7a88;font-size:12.5px;margin-top:5px}
+.acct .fe:empty{display:none}
+html.light .acct .fe{color:#c4001d}
+
+.acct .ag{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.acct .ag label{position:relative}
+.acct .ag input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0}
+.acct .ag span{display:grid;place-items:center;height:46px;border-radius:12px;border:1px solid var(--af);background:rgba(255,255,255,.04);font-weight:600;color:var(--t);transition:.3s var(--e)}
+html.light .acct .ag span{background:#fff}
+.acct .ag label:hover span{border-color:var(--rl)}
+.acct .ag input:checked+span{background:var(--r);border-color:var(--r);color:#fff;box-shadow:0 10px 24px -8px var(--r);transform:translateY(-2px)}
+.acct .ag input:focus-visible+span{outline:2px solid var(--rl);outline-offset:2px}
+.acct .ag .none{grid-column:1/-1}
+
+.acct .pwr{position:relative}
+.acct .pwr input{padding-right:70px}
+.acct .pwt{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;color:var(--rl)}
+html.light .acct .pwt{color:var(--r)}
+.acct .pwt:hover{background:rgba(225,29,52,.1)}
+
+.acct .bar{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;padding:12px 0 2px}
+.acct form#acf .bar{position:sticky;bottom:12px;z-index:5;margin-top:20px;padding:12px;border-radius:16px;background:rgba(18,8,11,.9);border:1px solid rgba(255,77,94,.3);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+html.light .acct form#acf .bar{background:rgba(255,255,255,.92);border-color:var(--ab);box-shadow:0 14px 34px -16px rgba(20,9,12,.3)}
+.acct .bar .btn{padding:12px 24px;white-space:nowrap}
+.acct .btn:disabled{opacity:.4;pointer-events:none;box-shadow:none}
+.acct button:focus-visible{outline:2px solid var(--rl);outline-offset:2px}
+
+@media(max-width:900px){
+  .acct .f2{grid-template-columns:1fr;gap:0}
+  .acct .bar .btn{flex:1}
+  .acct.has-tabs form#acf .bar{bottom:calc(86px + env(safe-area-inset-bottom))}
+}
+@media(max-width:420px){.acct .ag{gap:6px}}
