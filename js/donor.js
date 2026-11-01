@@ -11,7 +11,8 @@
   const D = P.details || {}, G = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const CAN = { 'O-': G, 'O+': ['O+', 'A+', 'B+', 'AB+'], 'A-': ['A-', 'A+', 'AB-', 'AB+'], 'A+': ['A+', 'AB+'], 'B-': ['B-', 'B+', 'AB-', 'AB+'], 'B+': ['B+', 'AB+'], 'AB-': ['AB-', 'AB+'], 'AB+': ['AB+'] };
   const ST = Object.assign({ alerts: true, loc: true, calm: false, light: true, sort: 'time', avail: D.available !== false }, J('ld_set') || {});
-  const HIST = P.provider === 'demo' ? [
+  const DEMO = P.provider === 'demo'; /* sample data below is shown to the demo account only */
+  const HIST = DEMO ? [
     { d: '2026-06-18', h: 'Square Hospitals', u: 1 }, { d: '2026-02-09', h: 'Dhaka Medical College Hospital', u: 1 },
     { d: '2025-10-03', h: 'United Hospital', u: 1 }, { d: '2025-05-21', h: 'BSMMU Blood Bank', u: 1 },
     { d: '2025-01-12', h: 'Evercare Hospital', u: 1 }, { d: '2024-09-02', h: 'Labaid Specialized Hospital', u: 1 }
@@ -26,7 +27,7 @@
   };
   const me = mkMe(P, U);
   const H = 36e5, now = Date.now();
-  const FEED = [
+  const FEED = (DEMO ? [
     { id: 1, n: 'Tasnim Rahman', g: 'O+', u: 2, h: 'Square Hospitals', km: 2.4, due: 2, ago: 12, urg: 2, x: 'Post-surgery patient needs blood urgently.' },
     { id: 2, n: 'Imran Hossain', g: 'A+', u: 1, h: 'United Hospital', km: 5.1, due: 6, ago: 40, urg: 1, x: 'Dengue patient, transfusion support needed.' },
     { id: 3, n: 'Farzana Akter', g: 'O-', u: 3, h: 'Dhaka Medical College', km: 3.8, due: 1.5, ago: 8, urg: 2, x: 'Emergency C-section, rare blood group.' },
@@ -34,19 +35,21 @@
     { id: 5, n: 'Mitu Sultana', g: 'AB+', u: 1, h: 'Evercare Hospital', km: 6.3, due: 30, ago: 200, urg: 0, x: 'Thalassemia patient, regular transfusion.' },
     { id: 6, n: 'Arif Chowdhury', g: 'O+', u: 1, h: 'Bangladesh Specialized', km: 4.2, due: 9, ago: 55, urg: 1, x: 'Accident victim recovering, needs one bag.' },
     { id: 7, n: 'Nusrat Jahan', g: 'A-', u: 2, h: 'Popular Medical', km: 7.9, due: 48, ago: 300, urg: 0, x: 'Cancer patient preparing for chemotherapy.' }
-  ].map(f => ({ ...f, at: now + f.due * H }));
+  ] : []).map(f => ({ ...f, at: now + f.due * H }));
   const ME = { lat: 23.7461, lng: 90.3742 }; /* demo location: Dhanmondi, Dhaka. Replace with the donor's saved location */
   const kmTo = (a, b) => { const r = x => x * Math.PI / 180, d = r(b.lat - a.lat), e = r(b.lng - a.lng), h = Math.sin(d / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(e / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); };
   /* Registered hospitals (demo list). Replace with your backend data. */
-  const HS = [{ n: 'Labaid Specialized Hospital', lat: 23.7392, lng: 90.3818 }, { n: 'Square Hospitals', lat: 23.7525, lng: 90.3813 }, { n: 'Dhaka Medical College Hospital', lat: 23.7259, lng: 90.3977 },
+  const HS = !DEMO ? [] : [{ n: 'Labaid Specialized Hospital', lat: 23.7392, lng: 90.3818 }, { n: 'Square Hospitals', lat: 23.7525, lng: 90.3813 }, { n: 'Dhaka Medical College Hospital', lat: 23.7259, lng: 90.3977 },
     { n: 'Bangladesh Specialized Hospital', lat: 23.7746, lng: 90.3647 }, { n: 'United Hospital', lat: 23.8043, lng: 90.4156 }, { n: 'Evercare Hospital', lat: 23.8103, lng: 90.4318 }]
     .map(h => ({ ...h, km: +kmTo(ME, h).toFixed(1) })).sort((a, b) => a.km - b.km);
   let MAP = null, MK = [];
   const MO = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
-  const DATA = [[38, 6, 24, 4, 11, 2, 45, 9], [42, 7, 27, 5, 13, 3, 48, 11], [35, 5, 22, 4, 10, 2, 40, 8], [47, 8, 30, 6, 14, 3, 52, 12], [44, 7, 28, 5, 12, 3, 50, 10], [52, 9, 33, 6, 16, 4, 58, 13]];
+  const DATA = !DEMO ? Array.from({ length: 6 }, () => Array(8).fill(0)) : [[38, 6, 24, 4, 11, 2, 45, 9], [42, 7, 27, 5, 13, 3, 48, 11], [35, 5, 22, 4, 10, 2, 40, 8], [47, 8, 30, 6, 14, 3, 52, 12], [44, 7, 28, 5, 12, 3, 50, 10], [52, 9, 33, 6, 16, 4, 58, 13]];
   const CL = ['#ff4d5e', '#ff8a5c', '#ffc15c', '#e5e66b', '#6be6a4', '#5cc8ff', '#8b7bff', '#e56bd6'];
   const REPLY = ['Thank you so much, I really appreciate it.', 'Please come to the blood bank counter when you arrive.', 'May you be blessed. We will be waiting for you.'];
-  let CV = J('ld_msgs') || { 1: { n: 'Tasnim Rahman', g: 'O+', m: [{ x: 'Assalamu alaikum, thank you for responding.' }, { x: 'Can you reach Square Hospitals today?' }] } };
+  /* Messages are stored per account, so one person never sees another's chats on a shared browser. */
+  const MKEY = () => 'ld_msgs_' + String(me.email || 'guest').toLowerCase();
+  let CV = J(MKEY()) || (DEMO ? { 1: { n: 'Tasnim Rahman', g: 'O+', m: [{ x: 'Assalamu alaikum, thank you for responding.' }, { x: 'Can you reach Square Hospitals today?' }] } } : {});
   let act = null, cur = 'dash', first = true;
 
   /* ---------- helpers ---------- */
@@ -55,7 +58,7 @@
   const ag = m => m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago';
   const cmp = g => g === me.group ? 2 : CAN[me.group].includes(g) ? 1 : 0;
   const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
-  const save = () => W('ld_msgs', CV);
+  const save = () => W(MKEY(), CV);
   const toast = t => { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2600); };
   const ic = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
   const NAV = [['dash', 'Dashboard', '<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>'], ['feed', 'Feed', '<path d="M4 5h16M4 12h16M4 19h10"/>'],
@@ -102,9 +105,9 @@
 <div class="grid">
 <section class="card c4" style="--i:1"><h3>Fit to donate?</h3><div class="ringw"><svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/><circle class="fg" cx="50" cy="50" r="42" style="--v:${e.p}"/></svg><div class="rc"><b>${e.ok ? 'Ready' : e.left}</b><small>${e.ok ? 'to donate' : 'days left'}</small></div></div><p class="st ${e.ok ? 'ok' : 'wait'}">${e.ok ? 'You are fit to donate again' : 'Next donation on ' + e.next}</p><small>Last donation: ${esc(e.last)} · 90-day gap</small></section>
 <section class="card c4" style="--i:2"><h3>Times donated</h3><div class="num" data-n="${n}">0</div><p>About <b data-n="${n * 3}">0</b> lives impacted · ${units} unit${units === 1 ? '' : 's'}</p><div class="bar2"><i style="--w:${Math.min(100, n / ms * 100)}%"></i></div><small>${n >= 25 ? 'Top milestone reached' : (ms - n) + ' more to reach ' + ms + ' donations'}</small></section>
-<section class="card c4" style="--i:3"><h3>Urgent patients</h3>${urg.map(f => `<div class="row" data-chat="${f.id}"><span class="gb s">${f.g}</span><div><b>${esc(f.n)}</b><small>${esc(f.h)} · ${f.km} km</small></div><span class="tm">${du(f.due)}</span></div>`).join('')}<button class="btn g" data-go="feed" style="width:100%;margin-top:4px">See all requests</button></section>
-${chartHTML()}
-<section class="card c5 map" style="--i:5"><h3>Nearest donation hospitals</h3><div class="lmap" id="lmap"></div><div class="hl">${HS.map((h, i) => `<button data-h="${i}" class="${i ? '' : 'on'}">${esc(h.n.split(' ')[0])} · ${h.km} km</button>`).join('')}</div><div class="hi" id="hi">${mapInfo(0)}</div></section>
+<section class="card c4" style="--i:3"><h3>Urgent patients</h3>${urg.length ? urg.map(f => `<div class="row" data-chat="${f.id}"><span class="gb s">${f.g}</span><div><b>${esc(f.n)}</b><small>${esc(f.h)} · ${f.km} km</small></div><span class="tm">${du(f.due)}</span></div>`).join('') : '<p class="em" style="padding:14px 0">No urgent requests right now.</p>'}<button class="btn g" data-go="feed" style="width:100%;margin-top:4px">See all requests</button></section>
+${DEMO ? chartHTML() : '<section class="card c7" style="--i:4"><h3>Blood donated through <b>LifeDrop</b></h3><p class="em">No donation data yet. Monthly totals will appear here once donations are recorded.</p></section>'}
+${HS.length ? `<section class="card c5 map" style="--i:5"><h3>Nearest donation hospitals</h3><div class="lmap" id="lmap"></div><div class="hl">${HS.map((h, i) => `<button data-h="${i}" class="${i ? '' : 'on'}">${esc(h.n.split(' ')[0])} · ${h.km} km</button>`).join('')}</div><div class="hi" id="hi">${mapInfo(0)}</div></section>` : '<section class="card c5 map" style="--i:5"><h3>Nearest donation hospitals</h3><p class="em">No hospitals connected yet. Registered hospitals near you will appear here.</p></section>'}
 <section class="card c4" style="--i:6"><h3>Who you can help</h3><small>You can donate to</small><div class="chips">${CAN[me.group].map(g => `<span class="${g === me.group ? 'me' : ''}">${g}</span>`).join('')}</div><small>You can receive from</small><div class="chips">${recv.map(g => `<span class="${g === me.group ? 'me' : ''}">${g}</span>`).join('')}</div></section>
 <section class="card c4" style="--i:7"><h3>Donor badges</h3><div class="bd">${[['First Drop', 1], ['Hero', 3], ['Lifesaver', 5], ['Legend', 10]].map(([t, k]) => `<div class="${n >= k ? '' : 'lock'}"><b>${k}</b>${t}</div>`).join('')}</div></section>
 <section class="card c4" style="--i:8"><h3>Before you donate</h3><ul class="tips"><li>Drink plenty of water the day before.</li><li>Eat an iron-rich meal 3 to 4 hours earlier.</li><li>Rest well and carry a photo ID.</li></ul></section>
@@ -114,7 +117,7 @@ ${chartHTML()}
   const posts = () => {
     const a = [...FEED], s = ST.sort;
     a.sort(s === 'near' ? (x, y) => x.km - y.km : s === 'type' ? (x, y) => cmp(y.g) - cmp(x.g) || x.at - y.at : (x, y) => x.at - y.at);
-    return a.map((f, i) => `<article class="card post" style="--i:${i}"><span class="gb s">${f.g}</span><div><b>${esc(f.n)}</b> <small>needs ${f.u} unit${f.u > 1 ? 's' : ''} · posted ${ag(f.ago)}</small><p>${esc(f.x)}</p><div class="tags"><span class="tag ${f.urg === 2 ? 'hot' : ''}">Needed in ${du(f.due)}</span><span class="tag">${esc(f.h)} · ${f.km} km</span><span class="tag ${cmp(f.g) ? 'ok' : ''}">${['Not compatible', 'Compatible', 'Exact match'][cmp(f.g)]}</span></div></div><button class="btn" data-chat="${f.id}">Message</button></article>`).join('');
+    return !a.length ? '<div class="card em" style="margin-top:6px">No blood requests yet. Requests from receivers will appear here.</div>' : a.map((f, i) => `<article class="card post" style="--i:${i}"><span class="gb s">${f.g}</span><div><b>${esc(f.n)}</b> <small>needs ${f.u} unit${f.u > 1 ? 's' : ''} · posted ${ag(f.ago)}</small><p>${esc(f.x)}</p><div class="tags"><span class="tag ${f.urg === 2 ? 'hot' : ''}">Needed in ${du(f.due)}</span><span class="tag">${esc(f.h)} · ${f.km} km</span><span class="tag ${cmp(f.g) ? 'ok' : ''}">${['Not compatible', 'Compatible', 'Exact match'][cmp(f.g)]}</span></div></div><button class="btn" data-chat="${f.id}">Message</button></article>`).join('');
   };
   const feed = () => `<div class="pills">${[['time', 'Donating time'], ['type', 'My blood type'], ['near', 'Nearest receiver']].map(([k, t]) => `<button data-s="${k}" class="${ST.sort === k ? 'on' : ''}">${t}</button>`).join('')}</div><div id="fl">${posts()}</div>`;
 
