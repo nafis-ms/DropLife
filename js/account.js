@@ -159,7 +159,7 @@ ${P2.provider === 'google' ? `<section class="card acc-card" style="--i:1"><div 
       const newEmail = v.email.toLowerCase();
       if (prevEmail && newEmail !== prevEmail) {
         try {
-          const moves = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && /^(ldr|ldh)_/.test(k) && k.endsWith('_' + prevEmail)) moves.push(k); }
+          const moves = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && /^(ldr|ldh|ld)_/.test(k) && k.endsWith('_' + prevEmail)) moves.push(k); }
           moves.forEach(k => { const nk = k.slice(0, k.length - prevEmail.length) + newEmail; if (localStorage.getItem(nk) === null) { localStorage.setItem(nk, localStorage.getItem(k)); localStorage.removeItem(k); } });
         } catch (x) { /* storage unavailable */ }
       }
