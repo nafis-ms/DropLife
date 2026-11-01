@@ -271,11 +271,9 @@ ${DEMO ? chartHTML().replace('--i:6', '--i:8') : '<section class="card c12" styl
     if (bad) { bad.focus(); return null; }
     return v;
   }
-  const pvHTML = v => `<div class="pvr"><span class="gb s">${v.group || '?'}</span><div><b>${esc(v.patient || 'Patient name')}</b> <small>needs blood · posted just now</small><p>${esc(v.reason || 'Reason for donation')}${v.note ? '. ' + esc(v.note) : ''}</p><div class="tags"><span class="tag hot">${v.date ? 'Needed on ' + fd(v.date) : 'Pick a date'}</span><span class="tag">${esc(v.hospital || 'Hospital')}</span>${v.loc ? `<span class="tag">${esc(v.loc)}</span>` : ''}</div></div></div>`;
 
   const neu = () => `<div class="grid"><section class="card c7" style="--i:0"><h3>Tell donors what you need</h3>${form()}</section>
-<div class="c5 col"><section class="card pvc" style="--i:1"><h3>How donors will see it</h3><div id="pv">${pvHTML({})}</div></section>
-<section class="card" style="--i:2"><h3>For a faster response</h3><ul class="tips"><li>Add the ward or floor to the hospital location.</li><li>Post a day ahead when you can.</li><li>Keep your phone nearby. Donors may message you.</li></ul></section></div></div>`;
+<div class="c5 col"><section class="card" style="--i:1"><h3>For a faster response</h3><ul class="tips"><li>Add the ward or floor to the hospital location.</li><li>Post a day ahead when you can.</li><li>Keep your phone nearby. Donors may message you.</li></ul></section></div></div>`;
 
   /* ---------- my requests ---------- */
   const rq = (r, i) => { const ms = dl(r) - Date.now(), dot = /[.!?]$/.test(r.reason) ? '' : '.'; return `<article class="card rq" style="--i:${i + 1}"><span class="gb s">${r.group}</span><div><h4>${esc(r.patient)}</h4><small>Posted ${ago(r.made)} · ${esc(r.hospital)}, ${esc(r.loc)}</small><p>${esc(r.reason)}${dot}${r.note ? ' ' + esc(r.note) : ''}</p><div class="tags"><span class="tag">${fd(r.date)}</span><span class="tag ${ms < DAY ? 'hot' : ''}">Closes in <span data-dl="${dl(r)}">${left(ms)}</span></span></div></div><div class="acts"><button type="button" class="btn sm" data-ed="${r.id}">Edit</button><button type="button" class="btn sm g" data-fu="${r.id}">Mark fulfilled</button><button type="button" class="btn sm g d" data-del="${r.id}">Delete</button></div></article>`; };
@@ -466,7 +464,6 @@ ${DEMO ? chartHTML().replace('--i:6', '--i:8') : '<section class="card c12" styl
     const f = e.target.closest('.rform'); if (!f) return;
     const box = e.target.closest('.fld');
     if (box) { box.classList.remove('bad'); const fe = $('.fe', box); if (fe) fe.textContent = ''; }
-    const pv = $('#pv'); if (pv && !f.dataset.edit) pv.innerHTML = pvHTML(readForm(f, false));
   });
   document.addEventListener('submit', e => {
     const f = e.target;
