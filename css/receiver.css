@@ -26,7 +26,7 @@ button:disabled{cursor:not-allowed}
 
 /* card titles: sentence case, readable */
 .card h3{font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--t);margin-bottom:12px}
-.card.map:hover,.card.pvc:hover,.card.chart:hover{transform:none}
+.card.map:hover,.card.chart:hover{transform:none}
 .lead{color:var(--m);margin:-6px 0 18px}
 .hero .btn{padding:13px 24px;white-space:nowrap}
 .btn.sm{padding:8px 14px;font-size:13px;border-radius:10px}
@@ -161,8 +161,6 @@ html.light .fe{color:#c4001d}
 .bg8 input:checked+span{background:var(--r);border-color:var(--r);color:#fff;box-shadow:0 10px 24px -8px var(--r);transform:translateY(-2px)}
 .bg8 input:focus-visible+span{outline:2px solid var(--rl);outline-offset:2px}
 .rform .btn{width:100%;padding:14px;margin-top:4px}
-.pvr{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
-.pvr p{margin-top:4px}
 
 /* my requests */
 .rq{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:start;margin-bottom:14px}
