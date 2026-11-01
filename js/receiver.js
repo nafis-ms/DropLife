@@ -28,6 +28,7 @@
   const K = k => 'ldr_' + k + '_' + (me.email || 'guest').toLowerCase();
 
   /* ---------- constants and demo data (replace with your backend) ---------- */
+  const DEMO = P.provider === 'demo'; /* sample data is shown to the demo account only */
   const H = 36e5, DAY = 864e5;
   const G = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const CAN = { 'O-': G, 'O+': ['O+', 'A+', 'B+', 'AB+'], 'A-': ['A-', 'A+', 'AB-', 'AB+'], 'A+': ['A+', 'AB+'], 'B-': ['B-', 'B+', 'AB-', 'AB+'], 'B+': ['B+', 'AB+'], 'AB-': ['AB-', 'AB+'], 'AB+': ['AB+'] };
@@ -44,21 +45,21 @@
     ['Anika T.', 'B+', .014, .006, 1], ['Jubayer C.', 'A+', .034, -.021, 0], ['Priya N.', 'AB-', -.017, -.027, 1], ['Hasan Z.', 'O+', .002, -.004, 1],
     ['Sumaiya B.', 'B+', -.009, .022, 1], ['Kamal U.', 'A+', .041, .012, 1], ['Ripon G.', 'O-', -.026, .031, 1], ['Tania F.', 'AB+', .021, -.033, 1]]
     .map(([n, g, a, b, ok], i) => { const o = { id: 'd' + i, n, g, lat: ME.lat + a, lng: ME.lng + b, ok: !!ok }; o.km = +kmTo(ME, o).toFixed(1); return o; })
-    .sort((x, y) => x.km - y.km);
+    .sort((x, y) => x.km - y.km).filter(() => DEMO);
 
   /* Hospitals with blood bank stock in units, in the order of G */
   const HS = [['Labaid Specialized Hospital', 23.7392, 90.3818, [34, 6, 28, 5, 12, 3, 41, 8]], ['Square Hospitals', 23.7525, 90.3813, [42, 9, 31, 7, 15, 4, 47, 12]],
     ['Dhaka Medical College Hospital', 23.7259, 90.3977, [21, 3, 18, 2, 9, 1, 26, 4]], ['Bangladesh Specialized Hospital', 23.7746, 90.3647, [27, 5, 22, 6, 10, 3, 33, 7]],
     ['United Hospital', 23.8043, 90.4156, [38, 8, 30, 6, 14, 5, 44, 10]], ['Evercare Hospital', 23.8103, 90.4318, [45, 11, 36, 9, 17, 6, 52, 14]]]
-    .map(([n, lat, lng, s]) => ({ n, lat, lng, s, km: +kmTo(ME, { lat, lng }).toFixed(1) })).sort((a, b) => a.km - b.km);
+    .map(([n, lat, lng, s]) => ({ n, lat, lng, s, km: +kmTo(ME, { lat, lng }).toFixed(1) })).sort((a, b) => a.km - b.km).filter(() => DEMO);
 
-  const DIST = [312, 58, 246, 41, 98, 22, 421, 86]; /* donors available on the server, by group */
-  const AVAIL = DIST.reduce((a, v) => a + v, 0), REG = 3412, ALL = 18204;
+  const DIST = DEMO ? [312, 58, 246, 41, 98, 22, 421, 86] : Array(8).fill(0); /* donors available on the server, by group */
+  const AVAIL = DIST.reduce((a, v) => a + v, 0), REG = DEMO ? 3412 : 0, ALL = DEMO ? 18204 : 0;
   const now0 = new Date();
   const mons = [...Array(6)].map((_, i) => new Date(now0.getFullYear(), now0.getMonth() - 5 + i, 1));
   const MO = mons.map(d => d.toLocaleString('en-GB', { month: 'short' }));
   const MF = mons.map(d => d.toLocaleString('en-GB', { month: 'long', year: 'numeric' }));
-  const DATA = [[212, 34, 166, 27, 66, 12, 289, 52], [231, 38, 172, 30, 71, 13, 301, 57], [205, 31, 158, 26, 62, 11, 274, 49],
+  const DATA = !DEMO ? Array.from({ length: 6 }, () => Array(8).fill(0)) : [[212, 34, 166, 27, 66, 12, 289, 52], [231, 38, 172, 30, 71, 13, 301, 57], [205, 31, 158, 26, 62, 11, 274, 49],
     [248, 41, 187, 33, 77, 15, 322, 61], [263, 44, 195, 35, 81, 16, 339, 66], [281, 47, 208, 38, 87, 18, 358, 71]];
 
   /* ---------- state ---------- */
@@ -149,7 +150,7 @@
 
   const vis = () => DN.filter(d => FG === 'All' || d.g === FG);
   const drow = d => `<div class="row dr${d.ok ? '' : ' off'}" data-fd="${d.id}"><span class="gb s">${d.g}</span><span class="rtx"><b>${esc(d.n)}</b><small>${d.km} km away</small><small>${d.ok ? '<i class="ldot"></i>Available' : 'Available soon'}</small></span><button type="button" class="btn sm" data-dm="${d.id}" ${d.ok ? '' : 'disabled'} aria-label="Message ${esc(d.n)}">Message</button></div>`;
-  const dlist = () => { const v = vis(); return v.length ? v.slice(0, 10).map(drow).join('') : `<p class="em">No ${FG} donors nearby yet.</p>`; };
+  const dlist = () => { const v = vis(); return v.length ? v.slice(0, 10).map(drow).join('') : `<p class="em">${FG === 'All' ? 'No donors nearby yet.' : 'No ' + FG + ' donors nearby yet.'}</p>`; };
   const dcount = () => { const v = vis(); return v.length ? `${v.length} ${FG === 'All' ? '' : FG + ' '}donor${v.length === 1 ? '' : 's'} within ${Math.ceil(Math.max(...v.map(d => d.km)))} km` : 'No matches'; };
 
   const compat = t => {
@@ -158,6 +159,7 @@
   };
 
   const stockFor = t => {
+    if (!HS.length) return '';
     const k = G.indexOf(t);
     return `<div class="sfw"><b>${t} in stock nearby</b><div class="sf">${HS.map((h, i) => ({ h, i, u: h.s[k] })).sort((a, b) => b.u - a.u).slice(0, 4).map(({ h, i, u }) => { const [c, l] = lv(u); return `<button type="button" data-h="${i}" class="sfr${i === SH ? ' on' : ''}"><span>${esc(h.n)}</span><b>${u}</b><em class="lv ${c}">${l}</em></button>`; }).join('')}</div></div>`;
   };
@@ -189,19 +191,19 @@
   function dash() {
     const a = [...REQ].sort((x, y) => dl(x) - dl(y)), mt = DATA.map((_, k) => tot(k)), mn = Math.min(...mt), mx = Math.max(...mt);
     const pts = mt.map((v, k) => [2 + k * 23.2, 30 - (v - mn) / ((mx - mn) || 1) * 24]), lp = pts[pts.length - 1];
-    const gr = Math.round((mt[5] - mt[4]) / mt[4] * 100);
+    const gr = mt[4] ? Math.round((mt[5] - mt[4]) / mt[4] * 100) : 0;
     const top = DIST.map((v, i) => [G[i], v]).sort((x, y) => y[1] - x[1]).slice(0, 3).map(([g, v]) => `${g} ${num(v)}`).join(', ');
     const t0 = me.group || 'B+';
     return `<section class="hero"><div><p class="eb">${greet()}</p><h2>${esc(me.first)}, donors are <em>close by.</em></h2></div><button type="button" class="btn" data-go="neu">Request blood</button></section>
 <div class="grid">
-<section class="card c4" style="--i:1"><h3>Donors available now</h3><div class="num" data-n="${AVAIL}">0</div><p><span class="live"></span>of ${num(REG)} registered on LifeDrop</p><div class="dist" role="img" aria-label="Available donors by blood group">${DIST.map((v, i) => `<i style="--f:${v};--c:${CL[i]};--k:${i}" title="${G[i]}: ${v}"></i>`).join('')}</div><small>Most available: ${top}</small></section>
-<section class="card c4" style="--i:2"><h3>Donations completed</h3><div class="num" data-n="${ALL}">0</div><svg class="spark" viewBox="0 0 120 36" role="img" aria-label="Donations over the last six months"><path pathLength="1" d="M${pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L')}"/><circle cx="${lp[0].toFixed(1)}" cy="${lp[1].toFixed(1)}" r="3"/></svg><small>${gr >= 0 ? '<span class="up">&#9650;</span>' : '<span class="dn">&#9660;</span>'} ${Math.abs(gr)}% vs last month · up to ${num(ALL * 3)} lives helped</small></section>
+<section class="card c4" style="--i:1"><h3>Donors available now</h3><div class="num" data-n="${AVAIL}">0</div><p><span class="live"></span>of ${num(REG)} registered on LifeDrop</p><div class="dist" role="img" aria-label="Available donors by blood group">${DIST.map((v, i) => `<i style="--f:${v};--c:${CL[i]};--k:${i}" title="${G[i]}: ${v}"></i>`).join('')}</div><small>${AVAIL ? 'Most available: ' + top : 'No donors online yet.'}</small></section>
+<section class="card c4" style="--i:2"><h3>Donations completed</h3><div class="num" data-n="${ALL}">0</div>${DEMO ? `<svg class="spark" viewBox="0 0 120 36" role="img" aria-label="Donations over the last six months"><path pathLength="1" d="M${pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L')}"/><circle cx="${lp[0].toFixed(1)}" cy="${lp[1].toFixed(1)}" r="3"/></svg><small>${gr >= 0 ? '<span class="up">&#9650;</span>' : '<span class="dn">&#9660;</span>'} ${Math.abs(gr)}% vs last month · up to ${num(ALL * 3)} lives helped</small>` : '<p>No donations recorded yet.</p>'}</section>
 <section class="card c4" style="--i:3"><h3>Your active requests</h3>${a.length ? a.slice(0, 3).map(r => `<button type="button" class="row" data-go="mine"><span class="gb s">${r.group}</span><span class="rtx"><b>${esc(r.patient)}</b><small>${esc(r.hospital)}</small></span><span class="tm" data-dl="${dl(r)}">${left(dl(r) - Date.now())}</span></button>`).join('') + `<button type="button" class="btn g" data-go="mine" style="width:100%;margin-top:4px">View all requests</button>` : `<p class="em" style="padding:14px 0">Nothing posted yet. Post a request and nearby donors will be alerted.</p><button type="button" class="btn" data-go="neu" style="width:100%">New request</button>`}</section>
-<section class="card c8 map" id="mapc" style="--i:4"><div class="mh"><h3>Live map</h3><div class="fchips" id="fc" role="group" aria-label="Filter donors by blood group">${['All', ...G].map(g => `<button type="button" data-f="${g}" class="${g === FG ? 'on' : ''}" aria-pressed="${g === FG}">${g}</button>`).join('')}</div></div><div class="lmap big" id="lmap"></div><div class="lg"><span><i class="k you"></i>You</span><span><i class="k hos"></i>Hospital</span><span><i class="k don"></i>Donor, coloured by blood group</span></div><small class="mcap">Demo area: Dhanmondi, Dhaka.</small></section>
+${HS.length ? `<section class="card c8 map" id="mapc" style="--i:4"><div class="mh"><h3>Live map</h3><div class="fchips" id="fc" role="group" aria-label="Filter donors by blood group">${['All', ...G].map(g => `<button type="button" data-f="${g}" class="${g === FG ? 'on' : ''}" aria-pressed="${g === FG}">${g}</button>`).join('')}</div></div><div class="lmap big" id="lmap"></div><div class="lg"><span><i class="k you"></i>You</span><span><i class="k hos"></i>Hospital</span><span><i class="k don"></i>Donor, coloured by blood group</span></div><small class="mcap">Demo area: Dhanmondi, Dhaka.</small></section>` : '<section class="card c8 map" id="mapc" style="--i:4"><h3>Live map</h3><p class="em">The map shows nearby donors and hospitals once they are connected to your area.</p></section>'}
 <section class="card c4 dcard" style="--i:5"><h3>Nearest donors</h3><small id="dn">${dcount()}</small><div class="dlist" id="dl">${dlist()}</div></section>
-<section class="card c7" style="--i:6"><h3>Nearby hospitals and blood bank stock</h3><div class="hs"><div class="hn" role="group" aria-label="Hospitals">${HS.map((h, i) => `<button type="button" data-h="${i}" class="${i === SH ? 'on' : ''}"><b>${esc(h.n)}</b><small>${h.km} km away</small></button>`).join('')}</div><div class="sp"><h4 id="sn"></h4><p class="sinfo" id="sm"></p><div class="srs">${rowsHTML()}</div><small id="stt"></small></div></div></section>
+${HS.length ? `<section class="card c7" style="--i:6"><h3>Nearby hospitals and blood bank stock</h3><div class="hs"><div class="hn" role="group" aria-label="Hospitals">${HS.map((h, i) => `<button type="button" data-h="${i}" class="${i === SH ? 'on' : ''}"><b>${esc(h.n)}</b><small>${h.km} km away</small></button>`).join('')}</div><div class="sp"><h4 id="sn"></h4><p class="sinfo" id="sm"></p><div class="srs">${rowsHTML()}</div><small id="stt"></small></div></div></section>` : '<section class="card c7" style="--i:6"><h3>Nearby hospitals and blood bank stock</h3><p class="em">No hospitals connected yet. Their blood bank stock will appear here.</p></section>'}
 <section class="card c5" style="--i:7"><h3>Who can donate to your patient</h3><small>Blood group needed</small><div class="fchips" id="cps" role="group" aria-label="Blood group needed" style="margin-top:8px">${G.map(g => `<button type="button" data-t="${g}" class="${g === t0 ? 'on' : ''}" aria-pressed="${g === t0}">${g}</button>`).join('')}</div><div id="cp">${compat(t0)}</div></section>
-${chartHTML().replace('--i:6', '--i:8')}
+${DEMO ? chartHTML().replace('--i:6', '--i:8') : '<section class="card c12" style="--i:8"><h3>Blood donated through LifeDrop, by blood group</h3><p class="em">No donation data yet. Monthly totals will appear here once donations are recorded.</p></section>'}
 </div>`;
   }
 
@@ -344,7 +346,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
     el.innerHTML = V[v]();
     if (v === 'set') LifeDropAccount.mount($('#acct'), { role: 'receiver', toast, onSaved: (p, u) => { Object.assign(me, mkMe(p, u)); $('#av').textContent = (me.first[0] || 'R').toUpperCase(); } });
     count(el, first ? 1500 : 150);
-    if (v === 'dash') { initMap(); paintStock(SH, true); }
+    if (v === 'dash') { initMap(); if (HS.length) paintStock(SH, true); }
     first = false;
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
     history.replaceState(null, '', '#' + v);
@@ -366,7 +368,7 @@ ${chartHTML().replace('--i:6', '--i:8')}
   }
   function profile() {
     const ful = HIST.filter(h => h.status === 'fulfilled').length;
-    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt">${LifeDropAccount.badge(me.photo, esc((me.first[0] || 'R').toUpperCase()))}<div><h2>${esc(me.name)}</h2><small>Receiver · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Country</small>${esc(me.country)}</div><div><small>Address</small>${esc(me.address || 'Not added')}</div><div><small>Blood group needed</small>${esc(me.group || 'Not set')}</div><div><small>Active requests</small>${REQ.length}</div><div><small>Total requests</small>${REQ.length + HIST.length}</div><div><small>Fulfilled</small>${ful}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo account' : 'Receiver'}</div><div class="w"><small>Map location</small>Dhanmondi, Dhaka (demo area)</div></div></div>`, 'Receiver profile');
+    openMod(`<div class="card pc" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="Close">&times;</button><div class="pt">${LifeDropAccount.badge(me.photo, esc((me.first[0] || 'R').toUpperCase()))}<div><h2>${esc(me.name)}</h2><small>Receiver · member since ${esc(me.since)}</small></div></div><div class="kv"><div><small>Email</small>${esc(me.email)}</div><div><small>Phone</small>${esc(me.phone)}</div><div><small>Country</small>${esc(me.country)}</div><div><small>Address</small>${esc(me.address || 'Not added')}</div><div><small>Blood group needed</small>${esc(me.group || 'Not set')}</div><div><small>Active requests</small>${REQ.length}</div><div><small>Total requests</small>${REQ.length + HIST.length}</div><div><small>Fulfilled</small>${ful}</div><div><small>Account type</small>${P.provider === 'demo' ? 'Demo account' : 'Receiver'}</div><div class="w"><small>Map location</small>${DEMO ? 'Dhanmondi, Dhaka (demo area)' : 'Not set'}</div></div></div>`, 'Receiver profile');
   }
   function editReq(id) {
     const r = REQ.find(x => x.id === id); if (!r) return;
