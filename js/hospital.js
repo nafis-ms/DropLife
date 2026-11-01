@@ -25,6 +25,7 @@
   const K = k => 'ldh_' + k + '_' + (me.email || 'guest').toLowerCase();
 
   /* ---------- constants ---------- */
+  const DEMO = P.provider === 'demo'; /* sample data is shown to the demo account only */
   const H = 36e5, DAY = 864e5, CAP = 80;
   const G = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const CL = ['#ff4d5e', '#ff8a5c', '#ffc15c', '#e5e66b', '#6be6a4', '#5cc8ff', '#8b7bff', '#e56bd6'];
@@ -36,16 +37,16 @@
   const OH = [['Labaid Specialized Hospital', 23.7392, 90.3818, 'Dhanmondi'], ['Square Hospitals', 23.7525, 90.3813, 'Panthapath'], ['Dhaka Medical College Hospital', 23.7259, 90.3977, 'Shahbagh'],
     ['Bangladesh Specialized Hospital', 23.7746, 90.3647, 'Shyamoli'], ['United Hospital', 23.8043, 90.4156, 'Gulshan'], ['Evercare Hospital', 23.8103, 90.4318, 'Bashundhara'],
     ['Ibn Sina Hospital', 23.7399, 90.3731, 'Dhanmondi'], ['Popular Medical Centre', 23.7455, 90.3737, 'Dhanmondi']]
-    .map(([n, lat, lng, area]) => ({ n, lat, lng, area, km: +kmTo(HOS, { lat, lng }).toFixed(1) })).sort((a, b) => a.km - b.km);
+    .map(([n, lat, lng, area]) => ({ n, lat, lng, area, km: +kmTo(HOS, { lat, lng }).toFixed(1) })).sort((a, b) => a.km - b.km).filter(() => DEMO);
 
-  const mk = (list, key) => list.map(([n, g, a, b, ok], i) => { const o = { id: key + i, n, g, lat: HOS.lat + a, lng: HOS.lng + b, ok: ok !== 0 }; o.km = +kmTo(HOS, o).toFixed(1); return o; }).sort((x, y) => x.km - y.km);
+  const mk = (list, key) => (DEMO ? list : []).map(([n, g, a, b, ok], i) => { const o = { id: key + i, n, g, lat: HOS.lat + a, lng: HOS.lng + b, ok: ok !== 0 }; o.km = +kmTo(HOS, o).toFixed(1); return o; }).sort((x, y) => x.km - y.km);
   const DN = mk([['Rafiq H.', 'O+', .006, .011], ['Nadia S.', 'A+', -.012, .004], ['Sabbir A.', 'B+', .018, -.009], ['Tahmina K.', 'O-', -.004, -.016], ['Mahin R.', 'AB+', .025, .02, 0], ['Shuvo D.', 'B-', -.021, .013],
     ['Lamia I.', 'A-', .009, .028], ['Fahim M.', 'O+', -.03, -.006], ['Anika T.', 'B+', .014, .006], ['Jubayer C.', 'A+', .034, -.021, 0], ['Priya N.', 'AB-', -.017, -.027], ['Hasan Z.', 'O+', .002, -.004]], 'd');
   const RC = mk([['Mahbub A.', 'B+', .008, -.012], ['Sultana B.', 'B+', -.015, .009], ['Karim U.', 'O+', .02, .018], ['Rehana P.', 'A+', -.008, -.02], ['Abdul M.', 'O-', .012, .03], ['Shirin A.', 'AB-', -.025, .008],
     ['Jamal H.', 'B-', .03, -.015], ['Taslima B.', 'A-', -.01, -.03], ['Habibur R.', 'O+', .005, .016], ['Mina K.', 'AB+', -.02, .025]], 'c');
 
-  const DIST = [312, 58, 246, 41, 98, 22, 421, 86], AVAIL = DIST.reduce((a, v) => a + v, 0), DREG = 3412;
-  const RDIST = [72, 12, 96, 14, 26, 6, 78, 14], RAVAIL = RDIST.reduce((a, v) => a + v, 0), RREG = 1906;
+  const DIST = DEMO ? [312, 58, 246, 41, 98, 22, 421, 86] : Array(8).fill(0), AVAIL = DIST.reduce((a, v) => a + v, 0), DREG = DEMO ? 3412 : 0;
+  const RDIST = DEMO ? [72, 12, 96, 14, 26, 6, 78, 14] : Array(8).fill(0), RAVAIL = RDIST.reduce((a, v) => a + v, 0), RREG = DEMO ? 1906 : 0;
 
   /* ---------- state ---------- */
   const ST = Object.assign({ lowAlert: true, msgAlert: true, calm: matchMedia('(prefers-reduced-motion: reduce)').matches, light: true }, J('ldh_set') || {});
@@ -66,8 +67,8 @@
 
   /* blood bank */
   let STOCK = J(K('stock'));
-  if (!Array.isArray(STOCK) || STOCK.length !== 8) { STOCK = P.provider === 'demo' ? [38, 6, 31, 0, 14, 3, 52, 9] : [0, 0, 0, 0, 0, 0, 0, 0]; W(K('stock'), STOCK); W(K('stockAt'), Date.now() - 3 * H); }
-  let STOCKAT = J(K('stockAt')) || Date.now(), DRAFT = [...STOCK];
+  if (!Array.isArray(STOCK) || STOCK.length !== 8) { STOCK = DEMO ? [38, 6, 31, 0, 14, 3, 52, 9] : [0, 0, 0, 0, 0, 0, 0, 0]; W(K('stock'), STOCK); if (DEMO) W(K('stockAt'), Date.now() - 3 * H); }
+  let STOCKAT = J(K('stockAt')) || 0, DRAFT = [...STOCK];
 
   /* confirmations: donors and receivers are stored separately */
   const seedD = () => P.provider !== 'demo' ? [] : [['Imran Hossain', 'imran.h@example.com', 'O+', '2026-10-24', 0, 'Regular donor.'], ['Farzana Ahmed', '+880 1711 220044', 'A+', '2026-10-19', 1, 'First donation, felt fine afterwards.'],
@@ -87,7 +88,7 @@
   const LN = ['Ahmed', 'Hossain', 'Rahman', 'Khan', 'Islam', 'Akter', 'Begum', 'Chowdhury', 'Mia', 'Sarkar', 'Uddin', 'Sheikh', 'Talukder', 'Bhuiyan', 'Mondal', 'Biswas', 'Roy', 'Das'];
   const GW = [22, 5, 28, 6, 9, 4, 34, 8];
   const pickG = () => { let x = rng() * GW.reduce((a, v) => a + v, 0); for (let i = 0; i < 8; i++) { x -= GW[i]; if (x < 0) return G[i]; } return 'O+'; };
-  const SERVER = (() => {
+  const SERVER = !DEMO ? [] : (() => {
     const out = [], t = Date.now(), pats = [];
     for (let i = 0; i < 150; i++) {
       let p;
@@ -98,11 +99,10 @@
     }
     return out;
   })();
-  const hashKm = n => 2 + (Math.abs([...n].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7)) % 100) / 10;
-  const enrich = r => { const h = OH.find(x => x.n === r.hospital); return { ...r, km: h ? h.km : +hashKm(r.hospital).toFixed(1) }; };
+  const enrich = r => { const h = OH.find(x => x.n === r.hospital); return { ...r, km: h ? h.km : null }; };
   const liveReqs = () => {
     const out = [];
-    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('ldr_reqs_') === 0) { const a = J(k); if (Array.isArray(a)) a.forEach(r => out.push({ ...r, id: 'L' + i + r.id, live: true })); } } } catch (e) {}
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('ldr_reqs_') === 0 && (DEMO || !k.endsWith('@demo.com'))) { const a = J(k); if (Array.isArray(a)) a.forEach(r => out.push({ ...r, id: 'L' + i + r.id, live: true })); } } } catch (e) {}
     return out;
   };
   const feedAll = () => [...SERVER, ...liveReqs()].map(enrich).filter(r => dl(r) >= Date.now());
@@ -142,6 +142,7 @@
   /* ---------- dashboard ---------- */
   const stockRows = () => G.map((g, i) => { const u = STOCK[i], [c, t, col] = lv(u); return `<div class="sr" style="--c:${col}"><span class="cg"><i style="background:${CL[i]};box-shadow:0 0 8px ${CL[i]}"></i>${g}</span><div class="tk"><div class="fl" style="--w:${Math.min(100, u / CAP * 100)}%"></div></div><b>${u}</b><em class="lv ${c}">${t}</em></div>`; }).join('');
   const stockAlert = () => {
+    if (!STOCKAT) return `<div class="alert" role="status">${ic(IC.warn)}<div><b>Set up your blood bank</b>Enter your stock under Blood bank so donors and receivers see accurate availability.</div></div>`;
     if (!ST.lowAlert) return '';
     const low = G.filter((g, i) => STOCK[i] < 10);
     return low.length ? `<div class="alert" role="status">${ic(IC.warn)}<div><b>Low stock: ${low.join(', ')}</b>Fewer than 10 units on hand. Update the blood bank or message nearby donors.</div></div>` : `<div class="alert fine" role="status">${ic(IC.conf)}<div><b>Stock looks healthy</b>Every blood type has 10 units or more.</div></div>`;
@@ -155,12 +156,12 @@
     const mx = Math.max(...cnt, 1), top = G[cnt.indexOf(Math.max(...cnt))], units = STOCK.reduce((a, v) => a + v, 0);
     return `<section class="hero"><div><p class="eb">${greet()}</p><h2>${esc(me.name)}, <em>every unit counts.</em></h2></div><button type="button" class="btn" data-go="bank">Update blood bank</button></section>
 <div class="grid">
-<section class="card c4" style="--i:1"><h3>Donors available</h3><div class="num" data-n="${AVAIL}">0</div><p><span class="live"></span>of ${num(DREG)} registered on the server</p>${distBar(DIST, 'Available donors by blood group')}<small>Most available: ${topOf(DIST)}</small></section>
-<section class="card c4" style="--i:2"><h3>Receivers available</h3><div class="num" data-n="${RAVAIL}">0</div><p><span class="live"></span>of ${num(RREG)} registered on the server</p>${distBar(RDIST, 'Available receivers by blood group')}<small>Most waiting: ${topOf(RDIST)}</small></section>
+<section class="card c4" style="--i:1"><h3>Donors available</h3><div class="num" data-n="${AVAIL}">0</div><p><span class="live"></span>of ${num(DREG)} registered on the server</p>${AVAIL ? distBar(DIST, 'Available donors by blood group') : ''}<small>${AVAIL ? 'Most available: ' + topOf(DIST) : 'No donors online yet.'}</small></section>
+<section class="card c4" style="--i:2"><h3>Receivers available</h3><div class="num" data-n="${RAVAIL}">0</div><p><span class="live"></span>of ${num(RREG)} registered on the server</p>${RAVAIL ? distBar(RDIST, 'Available receivers by blood group') : ''}<small>${RAVAIL ? 'Most waiting: ' + topOf(RDIST) : 'No receivers online yet.'}</small></section>
 <section class="card c4" style="--i:3"><h3>Patients needing blood</h3><div class="num" data-n="${total}">0</div><p>Each patient is counted once</p><small>${num(reqs - total)} duplicate request${reqs - total === 1 ? '' : 's'} merged from ${num(reqs)} open requests</small></section>
 <section class="card c7" style="--i:4"><h3>Your blood bank right now</h3><div class="srs">${stockRows()}</div><small class="cap">${num(units)} units in stock. Bars fill up to ${CAP} units.</small>${stockAlert()}</section>
-<section class="card c5" style="--i:5"><h3>Patients by blood type</h3><div class="ch-l">${G.map((g, i) => `<div class="cr" style="--c:${CL[i]}"><span class="cg"><i></i>${g}</span><div class="tk"><div class="fl" style="--w:${cnt[i] / mx * 100}%"></div></div><b data-n="${cnt[i]}">0</b><small>${Math.round(cnt[i] / total * 100)}%</small></div>`).join('')}</div><small class="cap">Most needed right now: ${top} (${cnt[G.indexOf(top)]} patients)</small></section>
-<section class="card c12 map" id="mapc" style="--i:6"><div class="mh"><h3>Live map</h3><div class="fchips tg" role="group" aria-label="Show on map">${[['d', 'Donors', '#ff4d5e'], ['r', 'Receivers', '#ffb020'], ['h', 'Hospitals', '#e11d34']].map(([k, t, c]) => `<button type="button" data-lay="${k}" class="${SHOW[k] ? 'on' : ''}" aria-pressed="${SHOW[k]}" style="--c:${c}"><i></i>${t}</button>`).join('')}</div></div><div class="lmap tall" id="lmap"></div><div class="lg"><span><i class="k you"></i>Your hospital</span><span><i class="k hos"></i>Other hospital</span><span><i class="k don"></i>Donor</span><span><i class="k rec"></i>Receiver</span></div><small class="mcap">Demo area: Dhaka. Markers show the nearest people and hospitals.</small></section>
+<section class="card c5" style="--i:5"><h3>Patients by blood type</h3><div class="ch-l">${G.map((g, i) => `<div class="cr" style="--c:${CL[i]}"><span class="cg"><i></i>${g}</span><div class="tk"><div class="fl" style="--w:${cnt[i] / mx * 100}%"></div></div><b data-n="${cnt[i]}">0</b><small>${total ? Math.round(cnt[i] / total * 100) : 0}%</small></div>`).join('')}</div><small class="cap">${total ? `Most needed right now: ${top} (${cnt[G.indexOf(top)]} patients)` : 'No patients need blood right now.'}</small></section>
+${OH.length ? `<section class="card c12 map" id="mapc" style="--i:6"><div class="mh"><h3>Live map</h3><div class="fchips tg" role="group" aria-label="Show on map">${[['d', 'Donors', '#ff4d5e'], ['r', 'Receivers', '#ffb020'], ['h', 'Hospitals', '#e11d34']].map(([k, t, c]) => `<button type="button" data-lay="${k}" class="${SHOW[k] ? 'on' : ''}" aria-pressed="${SHOW[k]}" style="--c:${c}"><i></i>${t}</button>`).join('')}</div></div><div class="lmap tall" id="lmap"></div><div class="lg"><span><i class="k you"></i>Your hospital</span><span><i class="k hos"></i>Other hospital</span><span><i class="k don"></i>Donor</span><span><i class="k rec"></i>Receiver</span></div><small class="mcap">Demo area: Dhaka. Markers show the nearest people and hospitals.</small></section>` : '<section class="card c12 map" id="mapc" style="--i:6"><h3>Live map</h3><p class="em">The map shows nearby donors, receivers and hospitals once they are connected to your area.</p></section>'}
 </div>`;
   }
 
@@ -187,7 +188,7 @@
   /* ---------- blood bank ---------- */
   const dirtyN = () => G.filter((g, i) => DRAFT[i] !== STOCK[i]).length;
   const bankRow = (g, i) => { const u = DRAFT[i], [c, t, col] = lv(u); return `<div class="bbr${u !== STOCK[i] ? ' dirty' : ''}" data-row="${i}" style="--c:${col}"><span class="cg"><i style="background:${CL[i]};box-shadow:0 0 8px ${CL[i]}"></i>${g}</span><div class="tk"><div class="fl" style="--w:${Math.min(100, u / CAP * 100)}%"></div></div><div class="stp"><button type="button" data-st="-1" data-i="${i}" aria-label="Decrease ${g}">&minus;</button><input type="number" inputmode="numeric" min="0" max="9999" step="1" data-i="${i}" value="${u}" aria-label="${g} units"><button type="button" data-st="1" data-i="${i}" aria-label="Increase ${g}">+</button></div><div class="lvl"><em class="lv ${c}">${t}</em><span>${u !== STOCK[i] ? 'Saved: ' + STOCK[i] : 'Saved'}</span></div></div>`; };
-  const bank = () => `<section class="card" style="--i:0"><div class="bsum"><div><small>Total units in stock</small><div class="num" id="bt" data-n="${DRAFT.reduce((a, v) => a + v, 0)}">0</div></div><div><small>Types running low</small><div class="num" id="bl" data-n="${DRAFT.filter(v => v < 10).length}">0</div></div><div><small>Last saved</small><p id="bu" style="margin:6px 0 0">${ago(STOCKAT)}</p></div></div><div class="bb">${G.map(bankRow).join('')}</div><small class="cap">Set a type to 0 if you have none. Bars fill up to ${CAP} units.</small></section>
+  const bank = () => `<section class="card" style="--i:0"><div class="bsum"><div><small>Total units in stock</small><div class="num" id="bt" data-n="${DRAFT.reduce((a, v) => a + v, 0)}">0</div></div><div><small>Types running low</small><div class="num" id="bl" data-n="${DRAFT.filter(v => v < 10).length}">0</div></div><div><small>Last saved</small><p id="bu" style="margin:6px 0 0">${STOCKAT ? ago(STOCKAT) : 'Not yet'}</p></div></div><div class="bb">${G.map(bankRow).join('')}</div><small class="cap">Set a type to 0 if you have none. Bars fill up to ${CAP} units.</small></section>
 <div class="savebar" id="sb" ${dirtyN() ? '' : 'hidden'}><span><b id="sbn">${dirtyN()}</b> unsaved change<span id="sbs">${dirtyN() === 1 ? '' : 's'}</span></span><div style="display:flex;gap:8px"><button type="button" class="btn g sm" data-reset>Discard</button><button type="button" class="btn sm" data-save>Save changes</button></div></div>`;
   function setVal(i, v, fromInput) {
     v = Math.max(0, Math.min(9999, Math.floor(+v) || 0)); DRAFT[i] = v;
@@ -203,12 +204,12 @@
 
   /* ---------- feed ---------- */
   const sortFeed = a => {
-    const by = { date: (x, y) => dl(x) - dl(y) || y.made - x.made, type: (x, y) => G.indexOf(x.group) - G.indexOf(y.group) || dl(x) - dl(y), dist: (x, y) => x.km - y.km || dl(x) - dl(y) };
+    const by = { date: (x, y) => dl(x) - dl(y) || y.made - x.made, type: (x, y) => G.indexOf(x.group) - G.indexOf(y.group) || dl(x) - dl(y), dist: (x, y) => (x.km == null ? 9e9 : x.km) - (y.km == null ? 9e9 : y.km) || dl(x) - dl(y) };
     return a.sort(by[FS.sort]);
   };
   const rq = (r, i) => {
     const ms = dl(r) - Date.now(), u = STOCK[G.indexOf(r.group)], dot = /[.!?]$/.test(r.reason) ? '' : '.';
-    return `<article class="card rq" style="--i:${Math.min(i, 8) + 1}"><span class="gb s">${r.group}</span><div><h4>${esc(r.patient)}${r.live ? ' <span class="tag ok">New</span>' : ''}</h4><small>Posted ${ago(r.made)} · ${esc(r.hospital)}, ${esc(r.loc)}</small><p>${esc(r.reason)}${dot}${r.note ? ' ' + esc(r.note) : ''}</p><div class="tags"><span class="tag">${fd(r.date)}</span><span class="tag ${ms < DAY ? 'hot' : ''}">Closes in <span data-dl="${dl(r)}">${left(ms)}</span></span><span class="tag">${r.km} km away</span><span class="tag ${u ? 'ok' : 'low'}">${u ? `You have ${u} unit${u === 1 ? '' : 's'} of ${r.group}` : `No ${r.group} in stock`}</span></div></div><div class="acts"><button type="button" class="btn sm" data-hm="${r.id}">Message</button></div></article>`;
+    return `<article class="card rq" style="--i:${Math.min(i, 8) + 1}"><span class="gb s">${r.group}</span><div><h4>${esc(r.patient)}${r.live ? ' <span class="tag ok">New</span>' : ''}</h4><small>Posted ${ago(r.made)} · ${esc(r.hospital)}, ${esc(r.loc)}</small><p>${esc(r.reason)}${dot}${r.note ? ' ' + esc(r.note) : ''}</p><div class="tags"><span class="tag">${fd(r.date)}</span><span class="tag ${ms < DAY ? 'hot' : ''}">Closes in <span data-dl="${dl(r)}">${left(ms)}</span></span><span class="tag">${r.km == null ? 'Distance unknown' : r.km + ' km away'}</span><span class="tag ${u ? 'ok' : 'low'}">${u ? `You have ${u} unit${u === 1 ? '' : 's'} of ${r.group}` : `No ${r.group} in stock`}</span></div></div><div class="acts"><button type="button" class="btn sm" data-hm="${r.id}">Message</button></div></article>`;
   };
   const feedList = () => {
     let a = feedAll(); if (FS.type !== 'All') a = a.filter(r => r.group === FS.type);
@@ -226,7 +227,7 @@
     const rest = catalog(k).filter(c => !stored.find(s => s.id === c.id)).slice(0, 8).map(c => ({ ...c, m: [], last: 0 }));
     return [...stored, ...rest];
   };
-  const clist = k => contacts(k).map(c => { const m = c.m.slice(-1)[0]; return `<button type="button" class="ct" data-ct="${c.id}"><span class="gb s">${c.g}</span><span class="rtx"><b>${esc(c.n)}</b><small>${m ? (m.me ? 'You: ' : '') + esc(m.x) : 'Start a conversation'}</small></span><span class="tm2">${m ? ago(m.t) : ''}</span></button>`; }).join('');
+  const clist = k => contacts(k).map(c => { const m = c.m.slice(-1)[0]; return `<button type="button" class="ct" data-ct="${c.id}"><span class="gb s">${c.g}</span><span class="rtx"><b>${esc(c.n)}</b><small>${m ? (m.me ? 'You: ' : '') + esc(m.x) : 'Start a conversation'}</small></span><span class="tm2">${m ? ago(m.t) : ''}</span></button>`; }).join('') || '<p class="em" style="padding:18px 8px">No conversations yet. Messages with ' + (k === 'donor' ? 'donors' : 'receivers') + ' will appear here.</p>';
   const thread = k => { const c = CV[k][ACT[k]]; return `<div class="tb"><div class="thh"><button type="button" class="bk" data-bk aria-label="Back to ${k} list">&larr;</button><b>${esc(c.n)}</b><small>${c.g} ${k}</small></div><div class="ms">${c.m.map(m => `<div class="m ${m.me ? 'me' : ''}">${esc(m.x)}</div>`).join('') || '<p class="em" style="margin:auto">Say hello to ' + esc(c.n) + '.</p>'}</div><form class="cf" data-cf><input placeholder="Write a message…" autocomplete="off" aria-label="Message to ${esc(c.n)}"><button class="btn">Send</button></form></div>`; };
   const chatCard = (k, i) => `<section class="card cc" data-kind="${k}" style="--i:${i};--c:${k === 'donor' ? '#ff4d5e' : '#ffb020'}">${chatInner(k)}</section>`;
   const chatInner = k => `<div class="chd"><span class="dot"></span><h3>${k === 'donor' ? 'Donors' : 'Receivers'}</h3><small>${Object.values(CV[k]).filter(c => c.m.length).length} conversation${Object.values(CV[k]).filter(c => c.m.length).length === 1 ? '' : 's'}</small></div>${ACT[k] && CV[k][ACT[k]] ? thread(k) : `<div class="lst">${clist(k)}</div>`}`;
